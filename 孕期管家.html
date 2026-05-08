@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="孕期管家">
+<meta name="theme-color" content="#b85c7e">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23ffd6e0'/><text x='50%25' y='62%25' font-size='110' text-anchor='middle' dominant-baseline='middle'>🤰</text></svg>">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤰</text></svg>">
+<title>孕期管家</title>
+<style>
+:root { color-scheme: light; --pink:#b85c7e; --pink-bg:#ffd6e0; --warm:#fdfaf6; --card:#fff; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  background: var(--warm);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans", "Helvetica Neue", sans-serif;
+  color: #2d2a26;
+  line-height: 1.55;
+  height: 100%;
+  overflow: hidden;
+}
+body { display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--pink-bg) 0%, #ffe8c9 100%);
+  padding: 14px 18px 12px;
+  flex-shrink: 0;
+}
+.app-header h1 { font-size: 17px; font-weight: 700; color: var(--pink); }
+.app-header .date { font-size: 11px; color: #7a5c4a; margin-top: 1px; }
+
+/* Main scroll area */
+main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 16px 100px;
+}
+section.tab-content { display: none; }
+section.tab-content.active { display: block; }
+
+/* Bottom nav */
+nav.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #efe7df;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+nav.bottom-nav button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px 4px;
+  font-size: 10px;
+  color: #999;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+nav.bottom-nav button .icon { font-size: 22px; }
+nav.bottom-nav button.active { color: var(--pink); }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.card h2 { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px; letter-spacing: 0.3px; }
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, var(--pink-bg) 0%, #ffe8c9 100%);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.hero-label { font-size: 12px; color: #7a5c4a; }
+.hero-num { font-size: 42px; font-weight: 700; color: var(--pink); line-height: 1; margin: 4px 0; }
+.hero-num span { font-size: 16px; font-weight: 400; }
+.hero-due { font-size: 12px; color: #7a5c4a; }
+.progress { height: 6px; background: rgba(255,255,255,0.6); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.progress > div { height: 100%; background: var(--pink); transition: width 0.6s; }
+
+/* Today's reminders */
+.reminder {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #f5efe7;
+  font-size: 13px;
+}
+.reminder:last-child { border-bottom: none; }
+.reminder .emoji { font-size: 18px; flex-shrink: 0; }
+.reminder .body { flex: 1; }
+.reminder .label { font-weight: 500; }
+.reminder .sub { font-size: 11px; color: #888; margin-top: 1px; }
+
+/* Next card */
+.next-card { background: #fff; border: 2px solid var(--pink); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.next-card .lbl { font-size: 10px; color: var(--pink); font-weight: 600; letter-spacing: 1px; }
+.next-card .title { font-size: 16px; font-weight: 600; margin: 3px 0 5px; }
+.next-card .meta { font-size: 12px; color: #666; }
+.next-card .cd { font-size: 12px; color: var(--pink); font-weight: 600; margin-top: 4px; }
+
+/* Timeline */
+.tl-item { background: #fff; border-radius: 11px; padding: 12px 14px; margin-bottom: 8px; border-left: 3px solid #ddd; }
+.tl-item.done { opacity: 0.5; border-left-color: #c5d6c5; }
+.tl-item.current { border-left-color: var(--pink); background: #fff5f8; }
+.tl-item.upcoming { border-left-color: #e8b87a; }
+.tl-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.tl-t { font-weight: 600; font-size: 14px; flex: 1; }
+.tl-w { font-size: 11px; color: #888; white-space: nowrap; }
+.tl-d { font-size: 12px; color: #555; margin-top: 3px; }
+.tl-jp { font-size: 11px; color: #888; margin-top: 2px; font-style: italic; }
+.tl-confirm { background: #fffaee; border-left: 3px solid #e8b87a; padding: 5px 8px; margin-top: 6px; font-size: 11px; color: #6b5530; border-radius: 3px; }
+.tag { display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 9px; margin-right: 5px; font-weight: 600; }
+.tag-key { background: #ffe0e8; color: var(--pink); }
+.tag-vacc { background: #e0f0ff; color: #4a7ab8; }
+.tag-supp { background: #fff0d6; color: #c87d2c; }
+.tag-body { background: #e8f5e0; color: #5a8a3d; }
+
+/* Supplements */
+.supp-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f0ebe5; gap: 10px; font-size: 12px; }
+.supp-row:last-child { border-bottom: none; }
+.supp-name { font-weight: 600; font-size: 13px; }
+.supp-sub { font-size: 11px; color: #666; }
+.supp-status { font-size: 11px; white-space: nowrap; text-align: right; }
+.st-take { color: #5a8a3d; }
+.st-add { color: #c87d2c; font-weight: 600; }
+.st-soon { color: #888; }
+
+/* Confirm sections */
+.confirm-card { background: #fff; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid #4a7ab8; }
+.confirm-card h3 { font-size: 13px; font-weight: 600; color: #4a7ab8; margin-bottom: 6px; }
+.confirm-card ul { padding-left: 16px; font-size: 12px; color: #555; }
+.confirm-card li { margin: 3px 0; }
+.jp { color: #4a7ab8; font-weight: 600; }
+
+/* Shopping */
+.shop-month { background: #fff; border-radius: 11px; margin-bottom: 8px; overflow: hidden; }
+.shop-month.current { background: #faf5ff; }
+.shop-month summary { padding: 12px 14px; cursor: pointer; user-select: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.shop-month summary::-webkit-details-marker { display: none; }
+.shop-mt { font-weight: 600; font-size: 13px; }
+.shop-mw { font-size: 11px; color: #888; }
+.shop-content { padding: 0 14px 12px; font-size: 12px; }
+.shop-note { font-size: 11px; color: #888; margin-bottom: 8px; padding-top: 4px; }
+.shop-item { padding: 8px 0; border-bottom: 1px dashed #f0ebe5; display: flex; align-items: flex-start; gap: 10px; }
+.shop-item:last-child { border-bottom: none; }
+.shop-item label { display: flex; align-items: flex-start; gap: 10px; flex: 1; cursor: pointer; }
+.shop-item input[type=checkbox] {
+  width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+  accent-color: var(--pink);
+}
+.shop-item-body { flex: 1; }
+.shop-item-name { font-weight: 500; font-size: 13px; }
+.shop-item.checked .shop-item-name { text-decoration: line-through; color: #aaa; }
+.shop-item-rec { font-size: 11px; color: #666; margin-top: 2px; }
+.priority { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 7px; margin-right: 4px; }
+.p-must { background: #ffe0e0; color: #d4361f; }
+.p-rec { background: #fff4d6; color: #c87d2c; }
+.p-opt { background: #e0e8f0; color: #6680a0; }
+
+/* Records */
+.sub-tabs { display: flex; gap: 6px; margin-bottom: 12px; background: #f0ebe5; padding: 3px; border-radius: 10px; }
+.sub-tabs button {
+  flex: 1; padding: 8px; background: none; border: none; border-radius: 8px;
+  font-size: 12px; font-family: inherit; color: #888; cursor: pointer;
+}
+.sub-tabs button.active { background: #fff; color: var(--pink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.sub-content { display: none; }
+.sub-content.active { display: block; }
+
+/* Form */
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.form-row input, .form-row select, .form-row textarea {
+  flex: 1; padding: 10px 12px; border: 1px solid #e5dccf; border-radius: 8px;
+  font-size: 14px; font-family: inherit; background: #fff;
+}
+.form-row label { font-size: 12px; color: #666; min-width: 60px; padding-top: 12px; }
+.btn {
+  background: var(--pink); color: white; border: none; padding: 10px 16px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer; width: 100%;
+}
+.btn:active { opacity: 0.8; }
+.btn-sec { background: #f0ebe5; color: #555; }
+
+/* Records list */
+.rec-item {
+  background: #fff; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+  font-size: 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.rec-item .rec-date { color: #888; font-size: 11px; }
+.rec-item .rec-val { font-weight: 600; color: var(--pink); }
+.rec-del { background: none; border: none; color: #ccc; font-size: 16px; cursor: pointer; padding: 0 4px; }
+
+/* Kick counter */
+.kick-display {
+  background: linear-gradient(135deg, #ffeef2, #fff5f8);
+  border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 12px;
+}
+.kick-num { font-size: 56px; font-weight: 700; color: var(--pink); line-height: 1; }
+.kick-lbl { font-size: 12px; color: #888; margin-top: 4px; }
+.kick-time { font-size: 12px; color: #666; margin-top: 8px; }
+.kick-btn {
+  width: 140px; height: 140px; border-radius: 50%; border: none;
+  background: var(--pink); color: white; font-size: 18px; font-weight: 600;
+  cursor: pointer; margin: 12px auto; display: block; box-shadow: 0 4px 14px rgba(184,92,126,0.3);
+}
+.kick-btn:active { transform: scale(0.95); }
+.kick-actions { display: flex; gap: 8px; }
+.kick-actions .btn { flex: 1; }
+
+/* Warning */
+.warning { background: #fff5f0; border: 1px solid #ffd0b8; border-radius: 12px; padding: 12px 14px; font-size: 12px; }
+.warning strong { color: #d4571f; display: block; margin-bottom: 5px; }
+.warning ul { padding-left: 16px; color: #555; }
+
+/* Empty state */
+.empty { text-align: center; padding: 30px 16px; color: #aaa; font-size: 12px; }
+
+/* Install hint */
+.install-hint {
+  background: #fffaee;
+  border: 1px solid #f0d99c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #6b5530;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.install-hint button { margin-left: auto; background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>🤰 孕期管家</h1>
+  <div class="date" id="headerDate">--</div>
+</header>
+
+<main>
+  <!-- HOME TAB -->
+  <section id="tab-home" class="tab-content active">
+    <div class="install-hint" id="installHint">
+      <span>📱</span>
+      <span>第一次打开？点 <b>分享 → 添加到主屏幕</b>，下次像 App 一样直接点图标打开</span>
+      <button onclick="dismissHint()">✕</button>
+    </div>
+
+    <div class="hero">
+      <div class="hero-label">当前孕周</div>
+      <div class="hero-num"><span id="weekText">--</span></div>
+      <div class="hero-due" id="dueText">距离预产期 -- 天</div>
+      <div class="progress"><div id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="next-card">
+      <div class="lbl">下一个重点</div>
+      <div class="title" id="nextTitle">--</div>
+      <div class="meta" id="nextMeta">--</div>
+      <div class="cd" id="nextCountdown">--</div>
+    </div>
+
+    <div class="card">
+      <h2>📋 今日提醒</h2>
+      <div id="todayReminders"></div>
+    </div>
+
+    <div class="card">
+      <h2>💊 当前营养品方案</h2>
+      <div id="suppList"></div>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ 出现以下立即就医</strong>
+      <ul>
+        <li>阴道出血或破水</li>
+        <li>持续剧烈头痛、视物模糊</li>
+        <li>持续上腹剧痛</li>
+        <li>胎动突然减少或消失（28周后）</li>
+        <li>高烧 38.5°C 以上</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- TIMELINE TAB -->
+  <section id="tab-timeline" class="tab-content">
+    <div id="timeline"></div>
+
+    <h2 style="font-size:13px;color:#555;margin:20px 0 10px;">📋 日本产检确认事项</h2>
+
+    <div class="confirm-card">
+      <h3>✅ 已经办理</h3>
+      <ul>
+        <li><span class="jp">母子手帳</span>：渋谷区役所领取，每次产检带</li>
+        <li><span class="jp">妊婦健診受診票</span>：补助券，14回分</li>
+      </ul>
+    </div>
+
+    <div class="confirm-card">
+      <h3>⏳ 还需要确认</h3>
+      <ul>
+        <li><span class="jp">分娩予約</span>：代官山是诊所还是产科医院？</li>
+        <li><span class="jp">NIPT / クアトロ</span>：自费 ¥10–20万，要不要做</li>
+        <li><span class="jp">出産育児一時金</span>：¥50万（2026年起）</li>
+        <li><span class="jp">無痛分娩</span>：日本不普及，要早确认医院</li>
+        <li><span class="jp">里帰り出産</span>：是否回国分娩</li>
+      </ul>
+    </div>
+
+    <div class="confirm-card">
+      <h3>💉 日本疫苗注意</h3>
+      <ul>
+        <li><span class="jp">三種混合（Tdap）</span>：日本非常规，可自费</li>
+        <li><span class="jp">インフルエンザ</span>：流感疫苗，秋冬建议</li>
+        <li><span class="jp">RS ウイルス</span>：2024年起可孕期接种</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SHOPPING TAB -->
+  <section id="tab-shopping" class="tab-content">
+    <div class="card" style="background:linear-gradient(135deg,#ede0ff,#faf5ff);">
+      <h2 style="color:#7a4ab8;">🛒 购物进度</h2>
+      <div id="shopProgress"></div>
+    </div>
+    <div id="shopTimeline"></div>
+  </section>
+
+  <!-- RECORDS TAB -->
+  <section id="tab-records" class="tab-content">
+    <div class="sub-tabs">
+      <button class="active" onclick="switchSub('weight')">体重</button>
+      <button onclick="switchSub('checkup')">产检</button>
+    </div>
+
+    <!-- Weight -->
+    <div id="sub-weight" class="sub-content active">
+      <div class="card">
+        <h2>📏 添加今日体重</h2>
+        <div class="form-row">
+          <input type="number" id="weightInput" placeholder="kg" step="0.1">
+          <button class="btn" style="width:auto;" onclick="addWeight()">添加</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px;">起始体重 57.5 kg（约10周）</div>
+      </div>
+      <div class="card">
+        <h2>📈 体重趋势</h2>
+        <canvas id="weightChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <h2>历史记录</h2>
+        <div id="weightList"></div>
+      </div>
+    </div>
+
+    <!-- Checkup -->
+    <div id="sub-checkup" class="sub-content">
+      <div class="card">
+        <h2>🏥 添加产检记录</h2>
+        <div class="form-row">
+          <label>日期</label>
+          <input type="date" id="checkupDate">
+        </div>
+        <div class="form-row">
+          <label>孕周</label>
+          <input type="text" id="checkupWeek" placeholder="自动填">
+        </div>
+        <div class="form-row">
+          <label>血压</label>
+          <input type="text" id="checkupBP" placeholder="111/69">
+        </div>
+        <div class="form-row">
+          <label>体重</label>
+          <input type="number" id="checkupWeight" placeholder="kg" step="0.1">
+        </div>
+        <div class="form-row">
+          <label>备注</label>
+          <textarea id="checkupNote" rows="2" placeholder="超声、胎心等"></textarea>
+        </div>
+        <button class="btn" onclick="addCheckup()">保存</button>
+      </div>
+      <div class="card">
+        <h2>历史记录</h2>
+        <div id="checkupList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KICK COUNTER TAB -->
+  <section id="tab-kicks" class="tab-content">
+    <div class="kick-display">
+      <div class="kick-num" id="kickCount">0</div>
+      <div class="kick-lbl">本次胎动次数</div>
+      <div class="kick-time" id="kickTime">还未开始</div>
+    </div>
+    <button class="kick-btn" id="kickBtn" onclick="recordKick()">🤰 点击记录</button>
+    <div class="kick-actions">
+      <button class="btn btn-sec" onclick="resetKick()">重置</button>
+      <button class="btn" onclick="saveKickSession()">保存本次</button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h2>📊 胎动建议</h2>
+      <div style="font-size:12px;color:#555;line-height:1.7;">
+        28周后每天数胎动，建议固定时间（早/中/晚饭后），1小时内 ≥ 3–4 次为正常。<br>
+        若 2 小时不到 10 次，或胎动突然明显减少，立即就医。
+      </div>
+    </div>
+    <div class="card">
+      <h2>历史记录</h2>
+      <div id="kickList"></div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="active" onclick="switchTab('home', this)"><div class="icon">🏠</div>主页</button>
+  <button onclick="switchTab('timeline', this)"><div class="icon">📅</div>时间轴</button>
+  <button onclick="switchTab('shopping', this)"><div class="icon">🛒</div>购物</button>
+  <button onclick="switchTab('records', this)"><div class="icon">📝</div>记录</button>
+  <button onclick="switchTab('kicks', this)"><div class="icon">👶</div>胎动</button>
+</nav>
+
+<script>
+// =================== 核心日期计算 ===================
+const DUE_DATE = new Date('2026-11-07');
+const LMP = new Date(DUE_DATE.getTime() - 280 * 24 * 60 * 60 * 1000);
+const today = new Date();
+today.setHours(0,0,0,0);
+const daysSinceLMP = Math.floor((today - LMP) / 86400000);
+const weeks = Math.floor(daysSinceLMP / 7);
+const dayOfWeek = daysSinceLMP % 7;
+const daysToDue = Math.ceil((DUE_DATE - today) / 86400000);
+const progressPct = Math.min(100, Math.max(0, (daysSinceLMP / 280) * 100));
+
+document.getElementById('weekText').innerHTML = weeks + '<span>周 ' + dayOfWeek + '天</span>';
+document.getElementById('dueText').textContent = '距离预产期 ' + daysToDue + ' 天';
+document.getElementById('progressFill').style.width = progressPct + '%';
+document.getElementById('headerDate').textContent =
+  today.getFullYear() + '/' + (today.getMonth()+1) + '/' + today.getDate() +
+  ' · 第' + weeks + '周' + dayOfWeek + '天';
+
+function weekDate(w) { return new Date(LMP.getTime() + w * 7 * 86400000); }
+function fmtDate(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+
+// =================== 时间轴数据 ===================
+const milestones = [
+  { week: 6, title: '初诊 · 妊娠确认', jp: '初診 / 妊娠確認', desc: '已完成 (3/6)', tag: 'key', done: true },
+  { week: 9, title: '第一次妊妇健检', jp: '第1回 妊婦健診', desc: '已完成 (4/10)', tag: 'key', done: true },
+  { week: 12, title: '稳定期超声', jp: '安定期エコー', desc: '已完成 (4/25)', tag: 'key', done: true },
+  { week: 13, title: '加入铁剂', jp: '鉄剤の追加', desc: '甘氨酸亚铁 27–30mg，配维C，与钙错开', tag: 'supp' },
+  { week: 14, title: '叶酸 → 复合维生素', jp: '葉酸 → マルチビタミン', desc: '神经管期已过', tag: 'supp' },
+  { week: 16, title: '中期唐筛 (Quad)', jp: 'クアトロテスト', desc: '15–20周；自费 ¥2–3万', tag: 'key', confirm: '与医生商量是否需要' },
+  { week: 17, title: '戌の日 · 帯祝い', jp: '戌の日（いぬのひ）', desc: '5个月戌日，神社参拜佩 腹帯', tag: 'body' },
+  { week: 18, title: '可能感觉胎动', jp: '胎動を感じ始める', desc: '初产妇 18–22周', tag: 'body' },
+  { week: 20, title: '⭐ 大排畸超声', jp: '中期エコー / 胎児ドック', desc: '20–24周，胎儿结构筛查', tag: 'key', confirm: '代官山是否提供？或去 FMF Japan' },
+  { week: 20, title: '加入钙剂', jp: 'カルシウム追加', desc: '柠檬酸钙 1000–1200mg，睡前', tag: 'supp' },
+  { week: 24, title: '⭐ 妊娠糖尿病筛查', jp: '50g GCT → 75g OGTT', desc: '24–28周', tag: 'key', confirm: '禁食、带糖水检查券' },
+  { week: 27, title: 'Tdap（可选）', jp: '三種混合（任意）', desc: '日本非常规，自费', tag: 'vacc' },
+  { week: 28, title: '产检每2周一次', jp: '健診 2週ごと', desc: '开始数胎动', tag: 'body' },
+  { week: 30, title: '整理待产包', jp: '入院セット準備', tag: 'body' },
+  { week: 32, title: '胎位评估', jp: 'さかご有無確認', desc: '关注是否头位', tag: 'body' },
+  { week: 35, title: '⭐ GBS 筛查', jp: 'B群溶連菌（GBS）検査', desc: '35–37周', tag: 'key' },
+  { week: 36, title: '产检每周一次', jp: '健診 毎週', tag: 'body' },
+  { week: 38, title: '临产观察期', jp: '臨月', desc: 'おしるし / 陣痛 / 破水', tag: 'body' },
+  { week: 40, title: '🎉 预产期 11/7', jp: '出産予定日', tag: 'key' },
+];
+milestones.sort((a,b) => a.week - b.week);
+
+// 下一个重点
+const upcomingKey = milestones.filter(m => !m.done && m.week >= weeks && (m.tag === 'key' || m.tag === 'vacc'));
+if (upcomingKey[0]) {
+  const m = upcomingKey[0];
+  const d = weekDate(m.week);
+  const dt = Math.ceil((d - today) / 86400000);
+  document.getElementById('nextTitle').textContent = m.title;
+  document.getElementById('nextMeta').textContent = '约孕' + m.week + '周 · ' + fmtDate(d) + ' · ' + m.jp;
+  document.getElementById('nextCountdown').textContent = dt > 0 ? '⏳ 还有约 ' + dt + ' 天' : '🟢 当前窗口期';
+}
+
+// 渲染时间轴
+const tagMap = { key:{cls:'tag-key',label:'检查'}, vacc:{cls:'tag-vacc',label:'疫苗'}, supp:{cls:'tag-supp',label:'营养'}, body:{cls:'tag-body',label:'身体'} };
+const tlEl = document.getElementById('timeline');
+milestones.forEach(m => {
+  let cls = 'tl-item';
+  if (m.done || m.week < weeks - 1) cls += ' done';
+  else if (Math.abs(m.week - weeks) <= 2) cls += ' current';
+  else cls += ' upcoming';
+  const t = tagMap[m.tag];
+  const d = weekDate(m.week);
+  const conf = m.confirm ? `<div class="tl-confirm">📌 ${m.confirm}</div>` : '';
+  tlEl.insertAdjacentHTML('beforeend', `
+    <div class="${cls}">
+      <div class="tl-h"><div class="tl-t"><span class="tag ${t.cls}">${t.label}</span>${m.title}</div><div class="tl-w">孕${m.week}周·${fmtDate(d)}</div></div>
+      ${m.desc?`<div class="tl-d">${m.desc}</div>`:''}
+      <div class="tl-jp">日：${m.jp}</div>${conf}
+    </div>`);
+});
+
+// =================== 营养品 ===================
+const supplements = [
+  { name: '叶酸/复合维', startW: 0, dose: '早餐后', note: '14周后换孕妇复合维' },
+  { name: 'DHA(藻油)', startW: 12, dose: '200–300mg · 晚餐后', note: '到哺乳期' },
+  { name: '维生素 D3', startW: 0, dose: '400–1000 IU · 随餐', note: '全程' },
+  { name: '铁剂', startW: 13, dose: '27–30mg · 中午配维C', note: '与钙错开2小时' },
+  { name: '钙', startW: 20, dose: '1000–1200mg · 睡前', note: '防夜抽筋' },
+];
+const suppEl = document.getElementById('suppList');
+supplements.forEach(s => {
+  let status, cls;
+  if (weeks >= s.startW) {
+    if (weeks - s.startW < 2) { status = '🆕 现在加入'; cls = 'st-add'; }
+    else { status = '✅ 持续'; cls = 'st-take'; }
+  } else { status = '⏳ ' + s.startW + '周开始'; cls = 'st-soon'; }
+  suppEl.insertAdjacentHTML('beforeend', `
+    <div class="supp-row">
+      <div><div class="supp-name">${s.name}</div><div class="supp-sub">${s.dose} · ${s.note}</div></div>
+      <div class="supp-status ${cls}">${status}</div>
+    </div>`);
+});
+
+// =================== 今日提醒 ===================
+const reminders = [];
+supplements.forEach(s => {
+  if (weeks >= s.startW) {
+    if (weeks - s.startW < 2) reminders.push({ emoji: '🆕', label: '本周开始：' + s.name, sub: s.dose });
+  }
+});
+upcomingKey.slice(0, 2).forEach(m => {
+  const d = weekDate(m.week);
+  const dt = Math.ceil((d - today) / 86400000);
+  if (dt <= 21) reminders.push({ emoji: '📅', label: m.title + '（' + dt + '天后）', sub: m.jp });
+});
+if (weeks >= 28) reminders.push({ emoji: '👶', label: '今天数胎动了吗？', sub: '建议固定时间（饭后），1小时 ≥3–4次' });
+if (reminders.length === 0) reminders.push({ emoji: '🌸', label: '今天保持愉快心情，规律饮食', sub: '一切按节奏进行中' });
+const remEl = document.getElementById('todayReminders');
+reminders.forEach(r => {
+  remEl.insertAdjacentHTML('beforeend', `<div class="reminder"><div class="emoji">${r.emoji}</div><div class="body"><div class="label">${r.label}</div><div class="sub">${r.sub||''}</div></div></div>`);
+});
+
+// =================== 购物清单 ===================
+const shopMonths = [
+  { month: 5, range: [16,19], title: '5ヶ月（16–19週）调研期', note: '逛实体店调研', items: [
+    { id: 'fukutai', p: 'must', name: '腹帯（ふくたい）', rec: '犬印本舗、ピジョン妊婦帯' },
+    { id: 'matwear', p: 'rec', name: '孕妇装/内衣', rec: 'ユニクロ、Sweet Mommy、犬印' },
+    { id: 'res-stroller', p: 'opt', name: '调研：ベビーカー', rec: '逛 アカチャンホンポ 试推' },
+  ]},
+  { month: 6, range: [20,23], title: '6ヶ月（20–23週）下大件', note: '大件提前订（产前2-3月送达）', items: [
+    { id: 'carseat', p: 'must', name: 'チャイルドシート', rec: 'Combi クルムーヴ、Aprica フラディア、Joie i-Spin 360' },
+    { id: 'bed', p: 'must', name: 'ベビーベッド/布団', rec: 'かしてネッと（租赁）、ファルスカ' },
+    { id: 'stroller', p: 'rec', name: 'ベビーカー A型', rec: 'Combi スゴカル、Aprica オプティア、Cybex Mios' },
+    { id: 'carrier', p: 'opt', name: '抱っこ紐', rec: 'Ergobaby Omni、Konny、BabyBjörn Mini' },
+  ]},
+  { month: 7, range: [24,27], title: '7ヶ月（24–27週）衣物', note: '糖筛前后下单，确保产前送达', items: [
+    { id: 'underwear', p: 'must', name: '新生儿肌着セット', rec: '短肌着+コンビ肌着 各5–6件，ミキハウス HB' },
+    { id: 'twoway', p: 'must', name: 'ツーウェイオール', rec: '50–60cm 5件，ミキハウス、コンビミニ' },
+    { id: 'diaper', p: 'rec', name: 'おむつ NB号', rec: 'Merries、Moony、Pampers Premium' },
+    { id: 'bath', p: 'rec', name: 'ベビーバス', rec: '永和、リッチェル 折叠款' },
+    { id: 'monitor', p: 'opt', name: 'ベビーモニター', rec: 'Cubo Ai、Panasonic KX-HC705' },
+  ]},
+  { month: 8, range: [28,31], title: '8ヶ月（28–31週）入院セット', note: '后期产检每2周', items: [
+    { id: 'hospital', p: 'must', name: '入院セット', rec: '産褥パッド、母乳パッド、骨盤ベルト、産後ショーツ' },
+    { id: 'bottle', p: 'must', name: '哺乳瓶 2–3只', rec: 'ピジョン 母乳実感、Betta、コンビ Teteo' },
+    { id: 'sterilizer', p: 'must', name: '消毒器', rec: 'コンビ 除菌じょ～ずα（蒸气消毒）' },
+    { id: 'gauze', p: 'rec', name: 'ガーゼハンカチ 20条', rec: 'ミキハウス、西松屋' },
+    { id: 'pump', p: 'rec', name: '搾乳器', rec: 'ピジョン 電動、Medela ハーモニー' },
+    { id: 'formula', p: 'opt', name: '粉ミルク（备用）', rec: '明治ほほえみ、森永はぐくみ' },
+  ]},
+  { month: 9, range: [32,35], title: '9ヶ月（32–35週）最终采购', note: '随时可能临产', items: [
+    { id: 'ceremony', p: 'must', name: '退院セレモニードレス', rec: 'ミキハウス、ファミリア' },
+    { id: 'towel', p: 'must', name: 'バスタオル/おくるみ', rec: 'aden+anais、今治タオル' },
+    { id: 'thermo', p: 'must', name: '体温計', rec: 'OMRON、Braun ThermoScan' },
+    { id: 'care', p: 'rec', name: '爪切、綿棒、ベビーオイル', rec: 'ピジョン 婴儿护理套装' },
+    { id: 'postpartum', p: 'rec', name: '产后骨盆带', rec: 'ピジョン、犬印 産後ガードル' },
+  ]},
+  { month: 10, range: [36,40], title: '10ヶ月（36週–）待产', note: '所有就位', items: [
+    { id: 'go', p: 'must', name: '住院包随身', rec: '母子手帳、保険証、印鑑、充电器' },
+  ]},
+];
+const priorityMap = { must:{cls:'p-must',l:'必备'}, rec:{cls:'p-rec',l:'推荐'}, opt:{cls:'p-opt',l:'可选'} };
+
+// 购物状态从 localStorage 读取
+function loadShop() { try { return JSON.parse(localStorage.getItem('shop_v1') || '{}'); } catch(e) { return {}; } }
+function saveShop(s) { localStorage.setItem('shop_v1', JSON.stringify(s)); }
+let shopState = loadShop();
+
+const shopEl2 = document.getElementById('shopTimeline');
+shopMonths.forEach(sm => {
+  const isCurrent = weeks >= sm.range[0] && weeks <= sm.range[1];
+  const isFuture = weeks < sm.range[0];
+  const itemsHTML = sm.items.map(it => {
+    const pl = priorityMap[it.p];
+    const checked = shopState[it.id] ? 'checked' : '';
+    const ckCls = shopState[it.id] ? 'checked' : '';
+    return `<div class="shop-item ${ckCls}" data-id="${it.id}">
+      <label><input type="checkbox" ${checked} onchange="toggleShop('${it.id}', this)">
+      <div class="shop-item-body"><div><span class="priority ${pl.cls}">${pl.l}</span><span class="shop-item-name">${it.name}</span></div><div class="shop-item-rec">${it.rec}</div></div></label>
+    </div>`;
+  }).join('');
+  shopEl2.insertAdjacentHTML('beforeend', `
+    <details ${isCurrent || (isFuture && sm.range[0]-weeks <=4) ? 'open' : ''} class="shop-month ${isCurrent?'current':''}">
+      <summary><div><span style="margin-right:6px;">${isCurrent?'🟣':(weeks>sm.range[1]?'✓':'⏳')}</span><span class="shop-mt">${sm.title}</span></div><div class="shop-mw">孕${sm.range[0]}–${sm.range[1]}周</div></summary>
+      <div class="shop-content"><div class="shop-note">${sm.note}</div>${itemsHTML}</div>
+    </details>`);
+});
+
+function toggleShop(id, cb) {
+  shopState[id] = cb.checked;
+  saveShop(shopState);
+  cb.closest('.shop-item').classList.toggle('checked', cb.checked);
+  updateShopProgress();
+}
+function updateShopProgress() {
+  let total = 0, done = 0, mustTotal = 0, mustDone = 0;
+  shopMonths.forEach(sm => sm.items.forEach(it => {
+    total++;
+    if (shopState[it.id]) done++;
+    if (it.p === 'must') { mustTotal++; if (shopState[it.id]) mustDone++; }
+  }));
+  document.getElementById('shopProgress').innerHTML =
+    `<div style="font-size:13px;">必备 <b>${mustDone}/${mustTotal}</b> · 全部 <b>${done}/${total}</b></div>
+     <div class="progress" style="margin-top:8px;background:rgba(122,74,184,0.15);"><div style="width:${total?(done/total*100):0}%;background:#7a4ab8;"></div></div>`;
+}
+updateShopProgress();
+
+// =================== 体重记录 ===================
+function loadW() { try { return JSON.parse(localStorage.getItem('weight_v1') || '[]'); } catch(e) { return []; } }
+function saveW(d) { localStorage.setItem('weight_v1', JSON.stringify(d)); }
+let weightData = loadW();
+
+function addWeight() {
+  const v = parseFloat(document.getElementById('weightInput').value);
+  if (!v) return;
+  weightData.push({ date: today.toISOString().slice(0,10), week: weeks + 'w' + dayOfWeek + 'd', weight: v });
+  saveW(weightData);
+  document.getElementById('weightInput').value = '';
+  renderWeights();
+}
+function delWeight(idx) {
+  weightData.splice(idx, 1); saveW(weightData); renderWeights();
+}
+function renderWeights() {
+  const list = document.getElementById('weightList');
+  list.innerHTML = weightData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...weightData].reverse().forEach((w, i) => {
+    const realIdx = weightData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `<div class="rec-item"><div><div>${w.date}</div><div class="rec-date">${w.week}</div></div><div style="display:flex;align-items:center;gap:8px;"><div class="rec-val">${w.weight} kg</div><button class="rec-del" onclick="delWeight(${realIdx})">✕</button></div></div>`);
+  });
+  drawWeightChart();
+}
+let weightChart = null;
+function drawWeightChart() {
+  const ctx = document.getElementById('weightChart');
+  if (!ctx || !window.Chart) return;
+  if (weightChart) weightChart.destroy();
+  const labels = weightData.map(w => w.week);
+  const data = weightData.map(w => w.weight);
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: '体重 kg', data, borderColor: '#b85c7e', backgroundColor: 'rgba(184,92,126,0.1)', tension: 0.3, fill: true }] },
+    options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:false}} }
+  });
+}
+renderWeights();
+
+// =================== 产检记录 ===================
+function loadC() { try { return JSON.parse(localStorage.getItem('checkup_v1') || '[]'); } catch(e) { return []; } }
+function saveC(d) { localStorage.setItem('checkup_v1', JSON.stringify(d)); }
+let checkupData = loadC();
+
+document.getElementById('checkupDate').valueAsDate = new Date();
+document.getElementById('checkupWeek').value = weeks + 'w' + dayOfWeek + 'd';
+document.getElementById('checkupDate').addEventListener('change', e => {
+  const d = new Date(e.target.value);
+  if (!isNaN(d)) {
+    const days = Math.floor((d - LMP) / 86400000);
+    document.getElementById('checkupWeek').value = Math.floor(days/7) + 'w' + (days%7) + 'd';
+  }
+});
+function addCheckup() {
+  const r = {
+    date: document.getElementById('checkupDate').value,
+    week: document.getElementById('checkupWeek').value,
+    bp: document.getElementById('checkupBP').value,
+    weight: document.getElementById('checkupWeight').value,
+    note: document.getElementById('checkupNote').value,
+  };
+  if (!r.date) return;
+  checkupData.push(r); saveC(checkupData); renderCheckups();
+  document.getElementById('checkupBP').value = '';
+  document.getElementById('checkupWeight').value = '';
+  document.getElementById('checkupNote').value = '';
+}
+function delCheckup(idx) { checkupData.splice(idx, 1); saveC(checkupData); renderCheckups(); }
+function renderCheckups() {
+  const list = document.getElementById('checkupList');
+  list.innerHTML = checkupData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...checkupData].reverse().forEach((c, i) => {
+    const realIdx = checkupData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `
+      <div class="rec-item" style="display:block;">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div><b>${c.date}</b> <span class="rec-date">${c.week||''}</span></div>
+          <button class="rec-del" onclick="delCheckup(${realIdx})">✕</button>
+        </div>
+        ${c.bp?`<div style="font-size:12px;margin-top:4px;">血压 ${c.bp}${c.weight?' · 体重 '+c.weight+'kg':''}</div>`:c.weight?`<div style="font-size:12px;margin-top:4px;">体重 ${c.weight}kg</div>`:''}
+        ${c.note?`<div style="font-size:12px;color:#666;margin-top:4px;">${c.note}</div>`:''}
+      </div>`);
+  });
+}
+renderCheckups();
+
+// =================== 胎动计数器 ===================
+let kickCount = 0, kickStart = null;
+function loadK() { try { return JSON.parse(localStorage.getItem('kicks_v1') || '[]'); } catch(e) { return []; } }
+function saveK(d) { localStorage.setItem('kicks_v1', JSON.stringify(d)); }
+let kickData = loadK();
+
+function recordKick() {
+  if (kickStart === null) kickStart = Date.now();
+  kickCount++;
+  document.getElementById('kickCount').textContent = kickCount;
+  updateKickTime();
+}
+function updateKickTime() {
+  if (kickStart === null) { document.getElementById('kickTime').textContent = '还未开始'; return; }
+  const mins = Math.floor((Date.now() - kickStart) / 60000);
+  document.getElementById('kickTime').textContent = '已计时 ' + mins + ' 分钟';
+}
+function resetKick() {
+  kickCount = 0; kickStart = null;
+  document.getElementById('kickCount').textContent = '0';
+  updateKickTime();
+}
+function saveKickSession() {
+  if (kickCount === 0) return;
+  const dur = kickStart ? Math.floor((Date.now() - kickStart) / 60000) : 0;
+  kickData.push({ date: new Date().toISOString().slice(0,16).replace('T',' '), count: kickCount, duration: dur, week: weeks + 'w' + dayOfWeek + 'd' });
+  saveK(kickData); renderKicks(); resetKick();
+}
+function delKick(idx) { kickData.splice(idx, 1); saveK(kickData); renderKicks(); }
+function renderKicks() {
+  const list = document.getElementById('kickList');
+  list.innerHTML = kickData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...kickData].reverse().forEach((k, i) => {
+    const realIdx = kickData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `<div class="rec-item"><div><div>${k.date}</div><div class="rec-date">${k.week} · ${k.duration}分钟</div></div><div style="display:flex;align-items:center;gap:8px;"><div class="rec-val">${k.count} 次</div><button class="rec-del" onclick="delKick(${realIdx})">✕</button></div></div>`);
+  });
+}
+renderKicks();
+setInterval(updateKickTime, 30000);
+
+// =================== Tab 切换 ===================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('nav.bottom-nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelector('main').scrollTo(0, 0);
+}
+function switchSub(name) {
+  document.querySelectorAll('.sub-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('sub-' + name).classList.add('active');
+  document.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// 安装提示
+function dismissHint() {
+  document.getElementById('installHint').style.display = 'none';
+  localStorage.setItem('hintDismissed_v1', '1');
+}
+if (localStorage.getItem('hintDismissed_v1')) document.getElementById('installHint').style.display = 'none';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous" onload="if(typeof renderWeights==='function')renderWeights()"></script>
+</body>
+</html>
