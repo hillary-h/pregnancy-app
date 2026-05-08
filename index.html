@@ -57,17 +57,18 @@ nav.bottom-nav button {
   flex: 1;
   background: none;
   border: none;
-  padding: 10px 4px;
-  font-size: 10px;
+  padding: 9px 2px;
+  font-size: 9.5px;
   color: #999;
   cursor: pointer;
   font-family: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+  min-width: 0;
 }
-nav.bottom-nav button .icon { font-size: 22px; }
+nav.bottom-nav button .icon { font-size: 20px; }
 nav.bottom-nav button.active { color: var(--pink); }
 
 /* Cards */
@@ -231,6 +232,29 @@ nav.bottom-nav button.active { color: var(--pink); }
 
 /* Empty state */
 .empty { text-align: center; padding: 30px 16px; color: #aaa; font-size: 12px; }
+
+/* Support tab */
+.sup-section { margin-bottom: 18px; }
+.sup-section-title { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; padding-left: 4px; }
+.sup-section-title.urgent { color: #d4361f; }
+.sup-card {
+  background: #fff; border-radius: 11px; padding: 12px 14px; margin-bottom: 8px;
+  border-left: 3px solid #ddd;
+}
+.sup-card.done { opacity: 0.55; border-left-color: #c5d6c5; }
+.sup-card.urgent { border-left-color: #d4361f; background: #fff5f3; }
+.sup-card.now { border-left-color: var(--pink); background: #fff5f8; }
+.sup-card.future { border-left-color: #e8b87a; }
+.sup-h { display: flex; align-items: flex-start; gap: 8px; }
+.sup-h input[type=checkbox] { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; accent-color: var(--pink); }
+.sup-h-body { flex: 1; }
+.sup-t { font-weight: 600; font-size: 14px; }
+.sup-card.done .sup-t { text-decoration: line-through; color: #999; }
+.sup-when { font-size: 11px; color: #888; margin-top: 2px; }
+.sup-when.deadline { color: #d4361f; font-weight: 600; }
+.sup-d { font-size: 12px; color: #555; margin-top: 6px; line-height: 1.5; }
+.sup-how { background: #f5f0fa; padding: 5px 8px; border-radius: 4px; margin-top: 6px; font-size: 11px; color: #6b4a8a; }
+.sup-amount { display: inline-block; background: #fff0d6; color: #c87d2c; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 4px; }
 
 /* Install hint */
 .install-hint {
@@ -404,6 +428,23 @@ nav.bottom-nav button.active { color: var(--pink); }
     </div>
   </section>
 
+  <!-- SUPPORT / SUBSIDIES TAB -->
+  <section id="tab-support" class="tab-content">
+    <div class="card" style="background:linear-gradient(135deg,#e0f0e8,#f0faf5);">
+      <h2 style="color:#3d8a5a;">🏛️ 政府补助 & 课程进度</h2>
+      <div id="supProgress"></div>
+    </div>
+    <div id="supList"></div>
+    <div class="warning" style="margin-top:14px;">
+      <strong>📌 重要提醒</strong>
+      <ul>
+        <li>出生后多项申请有 <b>14天 / 15天</b> 严格时限</li>
+        <li>建议提前打印好相关申请书，住院前放包里</li>
+        <li>若搬出涩谷区 → 部分券和服务失效，需新区办理</li>
+      </ul>
+    </div>
+  </section>
+
   <!-- KICK COUNTER TAB -->
   <section id="tab-kicks" class="tab-content">
     <div class="kick-display">
@@ -434,6 +475,7 @@ nav.bottom-nav button.active { color: var(--pink); }
   <button class="active" onclick="switchTab('home', this)"><div class="icon">🏠</div>主页</button>
   <button onclick="switchTab('timeline', this)"><div class="icon">📅</div>时间轴</button>
   <button onclick="switchTab('shopping', this)"><div class="icon">🛒</div>购物</button>
+  <button onclick="switchTab('support', this)"><div class="icon">🏛️</div>支援</button>
   <button onclick="switchTab('records', this)"><div class="icon">📝</div>记录</button>
   <button onclick="switchTab('kicks', this)"><div class="icon">👶</div>胎动</button>
 </nav>
@@ -766,6 +808,116 @@ function renderKicks() {
 }
 renderKicks();
 setInterval(updateKickTime, 30000);
+
+// =================== 政府补助 & 课程（按时间顺序） ===================
+// sortW: 妊娠周（产前）；产后用 40 + 出生后周数
+const supports = [
+  // ===== 孕早期 =====
+  { id:'sup-shika', sortW:6, t:'妊婦歯科健診', when:'孕初期（已完成 2/6）', d:'孕期 1 次免费牙科检查', how:'区指定牙科诊所', amount:'免费', done:true },
+  { id:'sup-bosi', sortW:8, t:'母子健康手帳', when:'妊娠届出后（已领取）', d:'渋谷区役所发放，每次产检带', how:'区役所子ども家庭部', amount:'免费', done:true },
+  { id:'sup-jushin', sortW:8, t:'妊婦健診受診票（14回分）', when:'随母子手帳发放（已领取）', d:'14回分产检补助券', how:'随母子手帳发放', amount:'¥10万+ 补助', done:true },
+
+  // ===== 孕中期 =====
+  { id:'sup-hokenrigen', sortW:12, t:'国民健康保险减免', when:'怀孕 85 天起（孕12周）', d:'产前1月+产后共4个月减免（双胎6个月）。预产期前6个月起可申请', how:'渋谷区役所国保科', amount:'保费减免' },
+  { id:'sup-mendan', sortW:16, t:'妊妇面谈（ネウボラ）', when:'孕 16–32 周', d:'与保健师沟通生产/育儿/产后支持。完成后才能领育儿礼包', how:'LINE 预约（面谈日前30天起）', amount:'免费' },
+  { id:'sup-ryoshin', sortW:16, t:'両親学級 / ハローベビー教室', when:'孕 16–32 周', d:'区主催课程：换尿布、洗澡、哺乳、产前后心理。爸爸也建议参加', how:'渋谷区 LINE 或网上预约', amount:'免费' },
+  { id:'sup-sankyu', sortW:24, t:'産前産後休業 申请（如工作）', when:'孕 6 月准备，产前 6 周开始', d:'产前6周（双胎14周）+ 产后8周。加入健康保险者可领出産手当金', how:'公司人事 / 健康保险', amount:'¥30–50万' },
+
+  // ===== 孕晚期 =====
+  { id:'sup-helper', sortW:28, t:'産前産後ヘルパー 申请', when:'孕 28 周起申请', d:'家务/育儿支援，1000日元/小时，可用至3岁', how:'渋谷区子育て支援科', amount:'1000円/h' },
+  { id:'sup-care', sortW:28, t:'産後ケア 申请', when:'孕 28 周起申请', d:'住宿型(¥3500/天)5天 / 上门型(¥1000/次)3次 / 日间型(¥2000/次)5次', how:'LINE 申请', amount:'¥1000–3500' },
+  { id:'sup-pkg', sortW:33, t:'育児パッケージ 育儿礼包', when:'孕 33 周后自动发放', d:'婴儿衣物、围兜、体温计、毛巾、玩具等。需先完成妊妇面谈+33周仍住涩谷区', how:'妊妇面谈完后自动到期发放', amount:'礼包约¥3万' },
+
+  // ===== 出生后（限期）=====
+  { id:'sup-shussei', sortW:40, t:'出生届（出生登记）', when:'出生后 14 天内 ⏰', d:'必交。先到医院拿出生证明书，再到区役所登记', how:'渋谷区役所戸籍住民課', amount:'必办', deadline: true },
+  { id:'sup-iryosho', sortW:40, t:'子供医療費補助 医療証', when:'出生后 14 天内 ⏰', d:'婴幼儿医疗费补助（无收入限制），所有医疗免费/低费', how:'区役所子ども家庭部', amount:'医疗补助', deadline: true },
+  { id:'sup-mynumber', sortW:40, t:'マイナンバー カード（推荐）', when:'随出生届一起办（最快）', d:'与出生申报一起办最快，约1周寄到。否则需带宝宝本人去办', how:'区役所同时申请', amount:'免费' },
+  { id:'sup-jido', sortW:40, t:'児童手当 申请', when:'出生后 15 天内 ⏰', d:'每月¥10,000–15,000，发放至高中毕业（18岁）。主收入者申请', how:'区役所子ども家庭部', amount:'¥1–1.5万/月', deadline: true },
+  { id:'sup-tsuchi', sortW:40, t:'出生通知票 提交', when:'出生后 1 个月内 ⏰', d:'用于安排新生儿访问、Hello Baby家访、健诊', how:'LINE 提交', amount:'必办', deadline: true },
+  { id:'sup-houmon', sortW:41, t:'新生児訪問', when:'出生后 28 天内', d:'助产师免费上门，指导喂养、体重、育儿问题', how:'提交出生通知票后自动安排', amount:'免费' },
+  { id:'sup-ichijikin', sortW:42, t:'出産育児一時金', when:'出生后 1 年内', d:'¥50万（2026年起）。多数医院使用直接支付制度，从产费扣除', how:'医院直接申请 / 健康保险', amount:'¥50万' },
+  { id:'sup-teate', sortW:42, t:'出産手当金（如工作）', when:'产后 2 年内申请', d:'产假期间补偿，约工资2/3 × 产前6周+产后8周', how:'健康保险組合 / 公司人事', amount:'¥30–50万' },
+  { id:'sup-yobou', sortW:44, t:'予防接種券', when:'生后 1 个月起', d:'政府寄送。定期疫苗免费，任意疫苗部分补助', how:'按时间表去儿科诊所', amount:'多数免费' },
+
+  // ===== 产后中长期 =====
+  { id:'sup-iku', sortW:46, t:'育児休業給付金（如工作）', when:'产假结束后', d:'育儿假补偿：前180天工资67%，之后50%', how:'公司人事 / ハローワーク', amount:'最长2年' },
+  { id:'sup-hello', sortW:48, t:'Hello Baby 家访', when:'出生后约 2 个月寄通知', d:'所有家庭都会安排，育儿咨询、心理支持', how:'区里通知后预约', amount:'免费' },
+  { id:'sup-hiyoko', sortW:48, t:'ひよこママの時間', when:'生后 1–5 个月', d:'区主办妈妈交流会，无需预约。情绪支持+认识其他妈妈', how:'随时参加', amount:'免费' },
+  { id:'sup-kenshin', sortW:53, t:'乳幼児健診', when:'3–4月 / 6–7月 / 9–10月 / 1.5岁 / 3岁', d:'区指定免费体检', how:'按通知去区指定医院', amount:'免费' },
+];
+
+// 按时间排序
+supports.sort((a, b) => a.sortW - b.sortW);
+
+function loadSup() { try { return JSON.parse(localStorage.getItem('sup_v1') || '{}'); } catch(e) { return {}; } }
+function saveSup(s) { localStorage.setItem('sup_v1', JSON.stringify(s)); }
+let supState = loadSup();
+// 预填已完成项
+supports.forEach(s => { if (s.done && supState[s.id] === undefined) supState[s.id] = true; });
+saveSup(supState);
+
+// 按时间分组：孕早期 / 孕中期 / 孕晚期 / 出生后限期 / 产后长期
+function getSupGroup(s) {
+  if (s.sortW < 13) return { key:'early', title:'🌱 孕早期', order:1 };
+  if (s.sortW < 28) return { key:'mid',   title:'🌷 孕中期', order:2 };
+  if (s.sortW < 40) return { key:'late',  title:'🌸 孕晚期', order:3 };
+  if (s.sortW < 43) return { key:'birth', title:'⏰ 出生后限期申请（最重要）', order:4, urgent:true };
+  return                   { key:'post',  title:'👶 产后中长期', order:5 };
+}
+
+const supEl = document.getElementById('supList');
+const groups = {};
+supports.forEach(s => {
+  const g = getSupGroup(s);
+  if (!groups[g.key]) groups[g.key] = { ...g, items: [] };
+  groups[g.key].items.push(s);
+});
+Object.values(groups).sort((a, b) => a.order - b.order).forEach(g => {
+  const titleCls = g.urgent ? 'sup-section-title urgent' : 'sup-section-title';
+  let html = `<div class="sup-section"><div class="${titleCls}">${g.title}</div>`;
+  g.items.forEach(s => {
+    const checked = supState[s.id] ? 'checked' : '';
+    let cardState;
+    if (supState[s.id]) cardState = 'done';
+    else if (s.deadline || g.urgent) cardState = 'urgent';
+    else if (s.sortW <= weeks + 2 && s.sortW >= weeks - 2) cardState = 'now';
+    else cardState = 'future';
+    const cardCls = `sup-card ${cardState}`;
+    const whenCls = s.deadline ? 'sup-when deadline' : 'sup-when';
+    html += `
+      <div class="${cardCls}" data-id="${s.id}">
+        <div class="sup-h">
+          <input type="checkbox" ${checked} onchange="toggleSup('${s.id}', this)">
+          <div class="sup-h-body">
+            <div class="sup-t">${s.t}</div>
+            <div class="${whenCls}">${s.when}</div>
+            ${s.amount ? `<span class="sup-amount">${s.amount}</span>` : ''}
+            ${s.d ? `<div class="sup-d">${s.d}</div>` : ''}
+            ${s.how ? `<div class="sup-how">📍 ${s.how}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  supEl.insertAdjacentHTML('beforeend', html);
+});
+
+function toggleSup(id, cb) {
+  supState[id] = cb.checked;
+  saveSup(supState);
+  cb.closest('.sup-card').classList.toggle('done', cb.checked);
+  updateSupProgress();
+}
+function updateSupProgress() {
+  const actionable = supports.filter(s => !s.done);
+  const done = actionable.filter(s => supState[s.id]).length;
+  const urgent = supports.filter(s => s.deadline);
+  const urgentDone = urgent.filter(s => supState[s.id]).length;
+  document.getElementById('supProgress').innerHTML =
+    `<div style="font-size:13px;">出生后限期 <b>${urgentDone}/${urgent.length}</b> · 全部 <b>${done}/${actionable.length}</b></div>
+     <div class="progress" style="margin-top:8px;background:rgba(61,138,90,0.15);"><div style="width:${actionable.length?(done/actionable.length*100):0}%;background:#3d8a5a;"></div></div>`;
+}
+updateSupProgress();
 
 // =================== Tab 切换 ===================
 function switchTab(name, btn) {
