@@ -2,507 +2,1020 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>孕期时间轴</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="孕期管家">
+<meta name="theme-color" content="#b85c7e">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23ffd6e0'/><text x='50%25' y='62%25' font-size='110' text-anchor='middle' dominant-baseline='middle'>🤰</text></svg>">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤰</text></svg>">
+<title>孕期管家</title>
 <style>
-:root { color-scheme: light; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
+:root { color-scheme: light; --pink:#b85c7e; --pink-bg:#ffd6e0; --warm:#fdfaf6; --card:#fff; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  background: var(--warm);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans", "Helvetica Neue", sans-serif;
-  background: #fdfaf6;
   color: #2d2a26;
-  line-height: 1.6;
-  padding: 20px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-h1 { font-size: 22px; margin-bottom: 4px; color: #b85c7e; }
-.subtitle { font-size: 13px; color: #888; margin-bottom: 20px; }
-
-.hero {
-  background: linear-gradient(135deg, #ffd6e0 0%, #ffe8c9 100%);
-  border-radius: 16px;
-  padding: 22px;
-  margin-bottom: 18px;
-  text-align: center;
-}
-.hero-week { font-size: 14px; color: #7a5c4a; margin-bottom: 6px; }
-.hero-bignum { font-size: 48px; font-weight: 700; color: #b85c7e; line-height: 1; }
-.hero-bignum span { font-size: 18px; font-weight: 400; }
-.hero-due { font-size: 13px; color: #7a5c4a; margin-top: 8px; }
-
-.progress-bar {
-  height: 8px;
-  background: rgba(255,255,255,0.6);
-  border-radius: 4px;
-  margin-top: 14px;
+  line-height: 1.55;
+  height: 100%;
   overflow: hidden;
 }
-.progress-fill {
-  height: 100%;
-  background: #b85c7e;
-  border-radius: 4px;
-  transition: width 0.6s;
-}
+body { display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
 
-.next-card {
-  background: #fff;
-  border: 2px solid #b85c7e;
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--pink-bg) 0%, #ffe8c9 100%);
+  padding: 14px 18px 12px;
+  flex-shrink: 0;
+}
+.app-header h1 { font-size: 17px; font-weight: 700; color: var(--pink); }
+.app-header .date { font-size: 11px; color: #7a5c4a; margin-top: 1px; }
+
+/* Main scroll area */
+main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 16px 100px;
+}
+section.tab-content { display: none; }
+section.tab-content.active { display: block; }
+
+/* Bottom nav */
+nav.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #efe7df;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+nav.bottom-nav button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 9px 2px;
+  font-size: 9.5px;
+  color: #999;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+nav.bottom-nav button .icon { font-size: 20px; }
+nav.bottom-nav button.active { color: var(--pink); }
+
+/* Cards */
+.card {
+  background: var(--card);
   border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 18px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
-.next-label { font-size: 11px; color: #b85c7e; font-weight: 600; letter-spacing: 1px; }
-.next-title { font-size: 18px; font-weight: 600; margin: 4px 0 6px; }
-.next-meta { font-size: 13px; color: #666; }
-.next-countdown { font-size: 13px; color: #b85c7e; font-weight: 600; margin-top: 6px; }
+.card h2 { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px; letter-spacing: 0.3px; }
 
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #555;
-  margin: 24px 0 10px;
-  letter-spacing: 0.5px;
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, var(--pink-bg) 0%, #ffe8c9 100%);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 12px;
 }
+.hero-label { font-size: 12px; color: #7a5c4a; }
+.hero-num { font-size: 42px; font-weight: 700; color: var(--pink); line-height: 1; margin: 4px 0; }
+.hero-num span { font-size: 16px; font-weight: 400; }
+.hero-due { font-size: 12px; color: #7a5c4a; }
+.progress { height: 6px; background: rgba(255,255,255,0.6); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.progress > div { height: 100%; background: var(--pink); transition: width 0.6s; }
 
-.timeline-item {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border-left: 4px solid #ddd;
-  position: relative;
+/* Today's reminders */
+.reminder {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #f5efe7;
+  font-size: 13px;
 }
-.timeline-item.done { opacity: 0.55; border-left-color: #c5d6c5; }
-.timeline-item.current { border-left-color: #b85c7e; background: #fff5f8; }
-.timeline-item.upcoming { border-left-color: #e8b87a; }
+.reminder:last-child { border-bottom: none; }
+.reminder .emoji { font-size: 18px; flex-shrink: 0; }
+.reminder .body { flex: 1; }
+.reminder .label { font-weight: 500; }
+.reminder .sub { font-size: 11px; color: #888; margin-top: 1px; }
 
-.ti-header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.ti-title { font-weight: 600; font-size: 15px; flex: 1; }
-.ti-week { font-size: 12px; color: #888; white-space: nowrap; }
-.ti-desc { font-size: 13px; color: #555; margin-top: 4px; }
-.ti-jp {
-  font-size: 12px;
-  color: #888;
-  margin-top: 4px;
-  font-style: italic;
-}
-.ti-confirm {
-  background: #fffaee;
-  border-left: 3px solid #e8b87a;
-  padding: 6px 10px;
-  margin-top: 8px;
-  font-size: 12px;
-  color: #6b5530;
-  border-radius: 4px;
-}
-.ti-tag {
-  display: inline-block;
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  margin-right: 6px;
-  font-weight: 600;
-}
-.tag-key { background: #ffe0e8; color: #b85c7e; }
+/* Next card */
+.next-card { background: #fff; border: 2px solid var(--pink); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.next-card .lbl { font-size: 10px; color: var(--pink); font-weight: 600; letter-spacing: 1px; }
+.next-card .title { font-size: 16px; font-weight: 600; margin: 3px 0 5px; }
+.next-card .meta { font-size: 12px; color: #666; }
+.next-card .cd { font-size: 12px; color: var(--pink); font-weight: 600; margin-top: 4px; }
+
+/* Timeline */
+.tl-item { background: #fff; border-radius: 11px; padding: 12px 14px; margin-bottom: 8px; border-left: 3px solid #ddd; }
+.tl-item.done { opacity: 0.5; border-left-color: #c5d6c5; }
+.tl-item.current { border-left-color: var(--pink); background: #fff5f8; }
+.tl-item.upcoming { border-left-color: #e8b87a; }
+.tl-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.tl-t { font-weight: 600; font-size: 14px; flex: 1; }
+.tl-w { font-size: 11px; color: #888; white-space: nowrap; }
+.tl-d { font-size: 12px; color: #555; margin-top: 3px; }
+.tl-jp { font-size: 11px; color: #888; margin-top: 2px; font-style: italic; }
+.tl-confirm { background: #fffaee; border-left: 3px solid #e8b87a; padding: 5px 8px; margin-top: 6px; font-size: 11px; color: #6b5530; border-radius: 3px; }
+.tag { display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 9px; margin-right: 5px; font-weight: 600; }
+.tag-key { background: #ffe0e8; color: var(--pink); }
 .tag-vacc { background: #e0f0ff; color: #4a7ab8; }
 .tag-supp { background: #fff0d6; color: #c87d2c; }
 .tag-body { background: #e8f5e0; color: #5a8a3d; }
-.tag-shop { background: #ede0ff; color: #7a4ab8; }
 
-.supplement-grid {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 13px;
-}
-.supp-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0ebe5;
-  gap: 10px;
-}
+/* Supplements */
+.supp-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f0ebe5; gap: 10px; font-size: 12px; }
 .supp-row:last-child { border-bottom: none; }
-.supp-name { font-weight: 600; }
-.supp-status { font-size: 12px; color: #666; }
-.status-take { color: #5a8a3d; }
-.status-add { color: #c87d2c; font-weight: 600; }
-.status-soon { color: #888; }
+.supp-name { font-weight: 600; font-size: 13px; }
+.supp-sub { font-size: 11px; color: #666; }
+.supp-status { font-size: 11px; white-space: nowrap; text-align: right; }
+.st-take { color: #5a8a3d; }
+.st-add { color: #c87d2c; font-weight: 600; }
+.st-soon { color: #888; }
 
-.shop-month {
-  background: #fff;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  overflow: hidden;
-  border-left: 4px solid #ede0ff;
-}
-.shop-month.current { border-left-color: #7a4ab8; background: #faf5ff; }
-.shop-header {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
-.shop-month-title { font-weight: 600; font-size: 14px; }
-.shop-month-week { font-size: 12px; color: #888; }
-.shop-content {
-  padding: 0 16px 12px;
-  font-size: 13px;
-}
-.shop-priority { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 8px; margin-right: 4px; }
-.priority-must { background: #ffe0e0; color: #d4361f; }
-.priority-rec { background: #fff4d6; color: #c87d2c; }
-.priority-opt { background: #e0e8f0; color: #6680a0; }
-.shop-item { padding: 6px 0; border-bottom: 1px dashed #f0ebe5; }
+/* Confirm sections */
+.confirm-card { background: #fff; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid #4a7ab8; }
+.confirm-card h3 { font-size: 13px; font-weight: 600; color: #4a7ab8; margin-bottom: 6px; }
+.confirm-card ul { padding-left: 16px; font-size: 12px; color: #555; }
+.confirm-card li { margin: 3px 0; }
+.jp { color: #4a7ab8; font-weight: 600; }
+
+/* Shopping */
+.shop-month { background: #fff; border-radius: 11px; margin-bottom: 8px; overflow: hidden; }
+.shop-month.current { background: #faf5ff; }
+.shop-month summary { padding: 12px 14px; cursor: pointer; user-select: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.shop-month summary::-webkit-details-marker { display: none; }
+.shop-mt { font-weight: 600; font-size: 13px; }
+.shop-mw { font-size: 11px; color: #888; }
+.shop-content { padding: 0 14px 12px; font-size: 12px; }
+.shop-note { font-size: 11px; color: #888; margin-bottom: 8px; padding-top: 4px; }
+.shop-item { padding: 8px 0; border-bottom: 1px dashed #f0ebe5; display: flex; align-items: flex-start; gap: 10px; }
 .shop-item:last-child { border-bottom: none; }
-.shop-item-name { font-weight: 500; }
-.shop-item-rec { font-size: 12px; color: #666; margin-top: 2px; }
-
-.confirm-box {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border-left: 4px solid #4a7ab8;
+.shop-item label { display: flex; align-items: flex-start; gap: 10px; flex: 1; cursor: pointer; }
+.shop-item input[type=checkbox] {
+  width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+  accent-color: var(--pink);
 }
-.confirm-box-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #4a7ab8; }
-.confirm-box ul { padding-left: 18px; font-size: 13px; color: #555; }
-.confirm-box li { margin: 4px 0; }
-.jp-term { color: #4a7ab8; font-weight: 600; }
+.shop-item-body { flex: 1; }
+.shop-item-name { font-weight: 500; font-size: 13px; }
+.shop-item.checked .shop-item-name { text-decoration: line-through; color: #aaa; }
+.shop-item-rec { font-size: 11px; color: #666; margin-top: 2px; }
+.priority { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 7px; margin-right: 4px; }
+.p-must { background: #ffe0e0; color: #d4361f; }
+.p-rec { background: #fff4d6; color: #c87d2c; }
+.p-opt { background: #e0e8f0; color: #6680a0; }
 
-.warning-box {
-  background: #fff5f0;
-  border: 1px solid #ffd0b8;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-top: 18px;
-  font-size: 13px;
+/* Records */
+.sub-tabs { display: flex; gap: 6px; margin-bottom: 12px; background: #f0ebe5; padding: 3px; border-radius: 10px; }
+.sub-tabs button {
+  flex: 1; padding: 8px; background: none; border: none; border-radius: 8px;
+  font-size: 12px; font-family: inherit; color: #888; cursor: pointer;
 }
-.warning-box strong { color: #d4571f; display: block; margin-bottom: 6px; }
-.warning-box ul { padding-left: 18px; color: #555; }
-.warning-box li { margin: 3px 0; }
+.sub-tabs button.active { background: #fff; color: var(--pink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.sub-content { display: none; }
+.sub-content.active { display: block; }
 
-.footer-note {
-  text-align: center;
+/* Form */
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.form-row input, .form-row select, .form-row textarea {
+  flex: 1; padding: 10px 12px; border: 1px solid #e5dccf; border-radius: 8px;
+  font-size: 14px; font-family: inherit; background: #fff;
+}
+.form-row label { font-size: 12px; color: #666; min-width: 60px; padding-top: 12px; }
+.btn {
+  background: var(--pink); color: white; border: none; padding: 10px 16px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer; width: 100%;
+}
+.btn:active { opacity: 0.8; }
+.btn-sec { background: #f0ebe5; color: #555; }
+
+/* Records list */
+.rec-item {
+  background: #fff; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+  font-size: 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.rec-item .rec-date { color: #888; font-size: 11px; }
+.rec-item .rec-val { font-weight: 600; color: var(--pink); }
+.rec-del { background: none; border: none; color: #ccc; font-size: 16px; cursor: pointer; padding: 0 4px; }
+
+/* Kick counter */
+.kick-display {
+  background: linear-gradient(135deg, #ffeef2, #fff5f8);
+  border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 12px;
+}
+.kick-num { font-size: 56px; font-weight: 700; color: var(--pink); line-height: 1; }
+.kick-lbl { font-size: 12px; color: #888; margin-top: 4px; }
+.kick-time { font-size: 12px; color: #666; margin-top: 8px; }
+.kick-btn {
+  width: 140px; height: 140px; border-radius: 50%; border: none;
+  background: var(--pink); color: white; font-size: 18px; font-weight: 600;
+  cursor: pointer; margin: 12px auto; display: block; box-shadow: 0 4px 14px rgba(184,92,126,0.3);
+}
+.kick-btn:active { transform: scale(0.95); }
+.kick-actions { display: flex; gap: 8px; }
+.kick-actions .btn { flex: 1; }
+
+/* Warning */
+.warning { background: #fff5f0; border: 1px solid #ffd0b8; border-radius: 12px; padding: 12px 14px; font-size: 12px; }
+.warning strong { color: #d4571f; display: block; margin-bottom: 5px; }
+.warning ul { padding-left: 16px; color: #555; }
+
+/* Empty state */
+.empty { text-align: center; padding: 30px 16px; color: #aaa; font-size: 12px; }
+
+/* Support tab */
+.sup-section { margin-bottom: 18px; }
+.sup-section-title { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; padding-left: 4px; }
+.sup-section-title.urgent { color: #d4361f; }
+.sup-card {
+  background: #fff; border-radius: 11px; padding: 12px 14px; margin-bottom: 8px;
+  border-left: 3px solid #ddd;
+}
+.sup-card.done { opacity: 0.55; border-left-color: #c5d6c5; }
+.sup-card.urgent { border-left-color: #d4361f; background: #fff5f3; }
+.sup-card.now { border-left-color: var(--pink); background: #fff5f8; }
+.sup-card.future { border-left-color: #e8b87a; }
+.sup-h { display: flex; align-items: flex-start; gap: 8px; }
+.sup-h input[type=checkbox] { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; accent-color: var(--pink); }
+.sup-h-body { flex: 1; }
+.sup-t { font-weight: 600; font-size: 14px; }
+.sup-card.done .sup-t { text-decoration: line-through; color: #999; }
+.sup-when { font-size: 11px; color: #888; margin-top: 2px; }
+.sup-when.deadline { color: #d4361f; font-weight: 600; }
+.sup-d { font-size: 12px; color: #555; margin-top: 6px; line-height: 1.5; }
+.sup-how { background: #f5f0fa; padding: 5px 8px; border-radius: 4px; margin-top: 6px; font-size: 11px; color: #6b4a8a; }
+.sup-amount { display: inline-block; background: #fff0d6; color: #c87d2c; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+
+/* Install hint */
+.install-hint {
+  background: #fffaee;
+  border: 1px solid #f0d99c;
+  border-radius: 10px;
+  padding: 10px 12px;
   font-size: 11px;
-  color: #aaa;
-  margin-top: 20px;
-  padding-bottom: 10px;
+  color: #6b5530;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
 }
-
-details summary {
-  list-style: none;
-  cursor: pointer;
-}
-details summary::-webkit-details-marker { display: none; }
-details[open] .shop-header::after { content: '▾'; color: #888; font-size: 10px; }
-details:not([open]) .shop-header::after { content: '▸'; color: #888; font-size: 10px; }
+.install-hint button { margin-left: auto; background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; }
 </style>
 </head>
 <body>
 
-<h1>🤰 孕期时间轴</h1>
-<div class="subtitle">代官山妇产科 · 预产期 2026-11-07 · <span id="todayLabel">--</span></div>
+<header class="app-header">
+  <h1>🤰 孕期管家</h1>
+  <div class="date" id="headerDate">--</div>
+</header>
 
-<div class="hero">
-  <div class="hero-week">当前孕周</div>
-  <div class="hero-bignum"><span id="weekText">--</span></div>
-  <div class="hero-due" id="dueText">距离预产期 -- 天</div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-</div>
+<main>
+  <!-- HOME TAB -->
+  <section id="tab-home" class="tab-content active">
+    <div class="install-hint" id="installHint">
+      <span>📱</span>
+      <span>第一次打开？点 <b>分享 → 添加到主屏幕</b>，下次像 App 一样直接点图标打开</span>
+      <button onclick="dismissHint()">✕</button>
+    </div>
 
-<div class="next-card">
-  <div class="next-label">下一个重点</div>
-  <div class="next-title" id="nextTitle">--</div>
-  <div class="next-meta" id="nextMeta">--</div>
-  <div class="next-countdown" id="nextCountdown">--</div>
-</div>
+    <div class="hero">
+      <div class="hero-label">当前孕周</div>
+      <div class="hero-num"><span id="weekText">--</span></div>
+      <div class="hero-due" id="dueText">距离预产期 -- 天</div>
+      <div class="progress"><div id="progressFill" style="width:0%"></div></div>
+    </div>
 
-<div class="section-title">💊 当前营养品方案</div>
-<div class="supplement-grid" id="suppList"></div>
+    <div class="next-card">
+      <div class="lbl">下一个重点</div>
+      <div class="title" id="nextTitle">--</div>
+      <div class="meta" id="nextMeta">--</div>
+      <div class="cd" id="nextCountdown">--</div>
+    </div>
 
-<div class="section-title">📅 完整时间轴（含日本产检术语）</div>
-<div id="timeline"></div>
+    <div class="card">
+      <h2>📋 今日提醒</h2>
+      <div id="todayReminders"></div>
+    </div>
 
-<div class="section-title">🛒 母婴用品购买时间表</div>
-<div id="shopTimeline"></div>
+    <div class="card">
+      <h2>💊 当前营养品方案</h2>
+      <div id="suppList"></div>
+    </div>
 
-<div class="section-title">📋 日本产检 · 必要确认事项</div>
+    <div class="card">
+      <h2>🔄 数据同步</h2>
+      <div style="font-size:12px;color:#666;margin-bottom:10px;">
+        所有数据存在本地。要在多台设备/与家人共享，可以导出 → 在另一台设备导入。
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sec" style="flex:1;" onclick="exportData()">📤 导出</button>
+        <button class="btn btn-sec" style="flex:1;" onclick="importData()">📥 导入</button>
+      </div>
+      <div id="syncStatus" style="font-size:11px;color:#888;margin-top:8px;text-align:center;"></div>
+    </div>
 
-<div class="confirm-box">
-  <div class="confirm-box-title">✅ 已经办理</div>
-  <ul>
-    <li><span class="jp-term">母子手帳（ぼしてちょう）</span>：渋谷区役所领取，每次产检带</li>
-    <li><span class="jp-term">妊婦健診受診票</span>：补助券，14回分</li>
-  </ul>
-</div>
+    <div class="warning">
+      <strong>⚠️ 出现以下立即就医</strong>
+      <ul>
+        <li>阴道出血或破水</li>
+        <li>持续剧烈头痛、视物模糊</li>
+        <li>持续上腹剧痛</li>
+        <li>胎动突然减少或消失（28周后）</li>
+        <li>高烧 38.5°C 以上</li>
+      </ul>
+    </div>
+  </section>
 
-<div class="confirm-box">
-  <div class="confirm-box-title">⏳ 还需要确认 / 办理</div>
-  <ul>
-    <li><span class="jp-term">分娩予約（ぶんべんよやく）</span>：代官山妇产科 → 确认是否在这里分娩，还是转产科医院（多数小诊所只做产检不接生）</li>
-    <li><span class="jp-term">NIPT / クアトロテスト</span>：出生前诊断，与医生讨论是否做（自费 ¥10–20万）</li>
-    <li><span class="jp-term">出産育児一時金</span>：¥50万（2026年起），出生后1年内申请</li>
-    <li><span class="jp-term">渋谷区子育てネウボラ</span>：ハローベビー教室、产前面谈</li>
-    <li><span class="jp-term">里帰り出産</span>：是否回老家或回国分娩 → 早决定（影响医院预约）</li>
-    <li><span class="jp-term">無痛分娩（むつうぶんべん）</span>：是否选择硬膜外麻醉 → 日本不普及，需提前确认医院支持</li>
-  </ul>
-</div>
+  <!-- TIMELINE TAB -->
+  <section id="tab-timeline" class="tab-content">
+    <div id="timeline"></div>
 
-<div class="confirm-box">
-  <div class="confirm-box-title">💉 日本疫苗与中美差异</div>
-  <ul>
-    <li><span class="jp-term">Tdap 三种混合疫苗</span>：日本不作为孕期常规推荐，但可自费打 → 与医生商量</li>
-    <li><span class="jp-term">インフルエンザワクチン</span>：流感疫苗，秋冬建议接种</li>
-    <li><span class="jp-term">RS ウイルス</span>：2024年起日本批准 Abrysvo（孕期接种），保护新生儿</li>
-  </ul>
-</div>
+    <h2 style="font-size:13px;color:#555;margin:20px 0 10px;">📋 日本产检确认事项</h2>
 
-<div class="warning-box">
-  <strong>⚠️ 出现以下立即就医</strong>
-  <ul>
-    <li>阴道出血或大量分泌物 / 破水</li>
-    <li>持续剧烈头痛、视物模糊（妊高征）</li>
-    <li>持续上腹或右上腹剧痛</li>
-    <li>胎动突然减少或消失（28周后）</li>
-    <li>高烧 38.5°C 以上</li>
-    <li>手脸突然严重水肿</li>
-  </ul>
-</div>
+    <div class="confirm-card">
+      <h3>✅ 已经办理</h3>
+      <ul>
+        <li><span class="jp">母子手帳</span>：渋谷区役所领取，每次产检带</li>
+        <li><span class="jp">妊婦健診受診票</span>：补助券，14回分</li>
+      </ul>
+    </div>
 
-<div class="footer-note">基于代官山妇产科记录 + 厚労省妊婦健診ガイド + アカチャンホンポ/タマヒヨ整理 · 一切以医嘱为准</div>
+    <div class="confirm-card">
+      <h3>⏳ 还需要确认</h3>
+      <ul>
+        <li><span class="jp">分娩予約</span>：代官山是诊所还是产科医院？</li>
+        <li><span class="jp">NIPT / クアトロ</span>：自费 ¥10–20万，要不要做</li>
+        <li><span class="jp">出産育児一時金</span>：¥50万（2026年起）</li>
+        <li><span class="jp">無痛分娩</span>：日本不普及，要早确认医院</li>
+        <li><span class="jp">里帰り出産</span>：是否回国分娩</li>
+      </ul>
+    </div>
+
+    <div class="confirm-card">
+      <h3>💉 日本疫苗注意</h3>
+      <ul>
+        <li><span class="jp">三種混合（Tdap）</span>：日本非常规，可自费</li>
+        <li><span class="jp">インフルエンザ</span>：流感疫苗，秋冬建议</li>
+        <li><span class="jp">RS ウイルス</span>：2024年起可孕期接种</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SHOPPING TAB -->
+  <section id="tab-shopping" class="tab-content">
+    <div class="card" style="background:linear-gradient(135deg,#ede0ff,#faf5ff);">
+      <h2 style="color:#7a4ab8;">🛒 购物进度</h2>
+      <div id="shopProgress"></div>
+    </div>
+    <div id="shopTimeline"></div>
+  </section>
+
+  <!-- RECORDS TAB -->
+  <section id="tab-records" class="tab-content">
+    <div class="sub-tabs">
+      <button class="active" onclick="switchSub('weight')">体重</button>
+      <button onclick="switchSub('checkup')">产检</button>
+    </div>
+
+    <!-- Weight -->
+    <div id="sub-weight" class="sub-content active">
+      <div class="card">
+        <h2>📏 添加今日体重</h2>
+        <div class="form-row">
+          <input type="number" id="weightInput" placeholder="kg" step="0.1">
+          <button class="btn" style="width:auto;" onclick="addWeight()">添加</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px;">起始体重 57.5 kg（约10周）</div>
+      </div>
+      <div class="card">
+        <h2>📈 体重趋势</h2>
+        <canvas id="weightChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <h2>历史记录</h2>
+        <div id="weightList"></div>
+      </div>
+    </div>
+
+    <!-- Checkup -->
+    <div id="sub-checkup" class="sub-content">
+      <div class="card">
+        <h2>🏥 添加产检记录</h2>
+        <div class="form-row">
+          <label>日期</label>
+          <input type="date" id="checkupDate">
+        </div>
+        <div class="form-row">
+          <label>孕周</label>
+          <input type="text" id="checkupWeek" placeholder="自动填">
+        </div>
+        <div class="form-row">
+          <label>血压</label>
+          <input type="text" id="checkupBP" placeholder="111/69">
+        </div>
+        <div class="form-row">
+          <label>体重</label>
+          <input type="number" id="checkupWeight" placeholder="kg" step="0.1">
+        </div>
+        <div class="form-row">
+          <label>备注</label>
+          <textarea id="checkupNote" rows="2" placeholder="超声、胎心等"></textarea>
+        </div>
+        <button class="btn" onclick="addCheckup()">保存</button>
+      </div>
+      <div class="card">
+        <h2>历史记录</h2>
+        <div id="checkupList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUPPORT / SUBSIDIES TAB -->
+  <section id="tab-support" class="tab-content">
+    <div class="card" style="background:linear-gradient(135deg,#e0f0e8,#f0faf5);">
+      <h2 style="color:#3d8a5a;">🏛️ 政府补助 & 课程进度</h2>
+      <div id="supProgress"></div>
+    </div>
+    <div id="supList"></div>
+    <div class="warning" style="margin-top:14px;">
+      <strong>📌 重要提醒</strong>
+      <ul>
+        <li>出生后多项申请有 <b>14天 / 15天</b> 严格时限</li>
+        <li>建议提前打印好相关申请书，住院前放包里</li>
+        <li>若搬出涩谷区 → 部分券和服务失效，需新区办理</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- KICK COUNTER TAB -->
+  <section id="tab-kicks" class="tab-content">
+    <div class="kick-display">
+      <div class="kick-num" id="kickCount">0</div>
+      <div class="kick-lbl">本次胎动次数</div>
+      <div class="kick-time" id="kickTime">还未开始</div>
+    </div>
+    <button class="kick-btn" id="kickBtn" onclick="recordKick()">🤰 点击记录</button>
+    <div class="kick-actions">
+      <button class="btn btn-sec" onclick="resetKick()">重置</button>
+      <button class="btn" onclick="saveKickSession()">保存本次</button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h2>📊 胎动建议</h2>
+      <div style="font-size:12px;color:#555;line-height:1.7;">
+        28周后每天数胎动，建议固定时间（早/中/晚饭后），1小时内 ≥ 3–4 次为正常。<br>
+        若 2 小时不到 10 次，或胎动突然明显减少，立即就医。
+      </div>
+    </div>
+    <div class="card">
+      <h2>历史记录</h2>
+      <div id="kickList"></div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="active" onclick="switchTab('home', this)"><div class="icon">🏠</div>主页</button>
+  <button onclick="switchTab('timeline', this)"><div class="icon">📅</div>时间轴</button>
+  <button onclick="switchTab('shopping', this)"><div class="icon">🛒</div>购物</button>
+  <button onclick="switchTab('support', this)"><div class="icon">🏛️</div>支援</button>
+  <button onclick="switchTab('records', this)"><div class="icon">📝</div>记录</button>
+  <button onclick="switchTab('kicks', this)"><div class="icon">👶</div>胎动</button>
+</nav>
 
 <script>
-const DUE_DATE = new Date('2026-11-07');
-const LMP = new Date(DUE_DATE.getTime() - 280 * 24 * 60 * 60 * 1000);
+// =================== 核心日期计算 ===================
+const DUE_DATE = new Date('2026-11-02');  // 预产期：2026年11月2日
+const LMP = new Date(DUE_DATE.getTime() - 280 * 24 * 60 * 60 * 1000);  // 末次月经 2026-01-26
 const today = new Date();
 today.setHours(0,0,0,0);
-
-const daysSinceLMP = Math.floor((today - LMP) / (24*60*60*1000));
+const daysSinceLMP = Math.floor((today - LMP) / 86400000);
 const weeks = Math.floor(daysSinceLMP / 7);
-const days = daysSinceLMP % 7;
-const daysToDue = Math.ceil((DUE_DATE - today) / (24*60*60*1000));
+const dayOfWeek = daysSinceLMP % 7;
+const daysToDue = Math.ceil((DUE_DATE - today) / 86400000);
 const progressPct = Math.min(100, Math.max(0, (daysSinceLMP / 280) * 100));
 
-document.getElementById('weekText').innerHTML = weeks + '<span>周 ' + days + '天</span>';
+document.getElementById('weekText').innerHTML = weeks + '<span>周 ' + dayOfWeek + '天</span>';
 document.getElementById('dueText').textContent = '距离预产期 ' + daysToDue + ' 天';
 document.getElementById('progressFill').style.width = progressPct + '%';
-const todayStr = today.getFullYear() + '/' + (today.getMonth()+1) + '/' + today.getDate();
-document.getElementById('todayLabel').textContent = '今天 ' + todayStr;
+document.getElementById('headerDate').textContent =
+  today.getFullYear() + '/' + (today.getMonth()+1) + '/' + today.getDate() +
+  ' · 第' + weeks + '周' + dayOfWeek + '天';
 
-function weekDate(w) {
-  return new Date(LMP.getTime() + w * 7 * 24*60*60*1000);
-}
-function fmtDate(d) {
-  return (d.getMonth()+1) + '月' + d.getDate() + '日';
-}
+function weekDate(w) { return new Date(LMP.getTime() + w * 7 * 86400000); }
+function fmtDate(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
 
-// 完整时间轴 — 加入日本术语和确认事项
+// =================== 时间轴数据 ===================
 const milestones = [
-  { week: 6, title: '初诊 · 妊娠确认', jp: '初診 / 妊娠確認', desc: '已完成 (2026-03-06)', tag: 'key', done: true },
-  { week: 9, title: '第一次妊妇健检', jp: '第1回 妊婦健診', desc: '已完成 (2026-04-10)', tag: 'key', done: true },
-  { week: 12, title: '稳定期超声', jp: '安定期超音波（エコー）', desc: '已完成 (2026-04-25)', tag: 'key', done: true },
-  { week: 13, title: '加入铁剂', jp: '鉄剤の追加', desc: '甘氨酸亚铁 27–30mg，配维C/橙汁，与钙错开2小时', tag: 'supp' },
-  { week: 14, title: '叶酸 → 复合维生素', jp: '葉酸 → マルチビタミン', desc: '神经管发育关键期已过，可改为含叶酸的孕妇复合维', tag: 'supp' },
-  { week: 16, title: '中期唐筛 (Quad)', jp: 'クアトロテスト', desc: '15–20周窗口；日本非常规，自费约 ¥2–3万。与医生确认', tag: 'key',
-    confirm: '与医生商量是否需要做；如做 NIPT 已涵盖类似筛查' },
-  { week: 17, title: '戌の日 · 帯祝い', jp: '戌の日（いぬのひ）', desc: '日本传统：5个月零1天的戌日去神社参拜，戴 腹帯（ふくたい）祈安产', tag: 'body' },
-  { week: 18, title: '可能开始感觉胎动', jp: '胎動（たいどう）を感じ始める', desc: '初产妇通常 18–22周', tag: 'body' },
-  { week: 20, title: '⭐ 大排畸超声', jp: '中期超音波スクリーニング / 胎児ドック', desc: '20–24周，胎儿结构筛查。日本部分医院作为自费胎児ドック (¥1–3万)', tag: 'key',
-    confirm: '代官山是否提供？若不提供可去专门胎児ドック医院（如 FMF Japan）' },
-  { week: 20, title: '加入钙剂', jp: 'カルシウム追加', desc: '柠檬酸钙 1000–1200mg，睡前服用防抽筋', tag: 'supp' },
-  { week: 24, title: '⭐ 妊娠糖尿病筛查', jp: '50g GCT → 75g OGTT', desc: '日本流程：先做 50g 糖负荷筛查，阳性再做 75g OGTT（空腹+1h+2h）', tag: 'key',
-    confirm: '当天禁食、带糖水检查券；血糖标准 92/180/153' },
-  { week: 27, title: 'Tdap 百白破疫苗（可选）', jp: '三種混合（任意）', desc: '日本非常规推荐，可自费打。秋冬另需流感疫苗 インフルエンザワクチン', tag: 'vacc',
-    confirm: '问医生是否提供；可去内科诊所打' },
-  { week: 28, title: '产检改为每2周一次', jp: '健診 2週間に1回', desc: '日本厚労省标准：24–35周每2周。每天数胎动（1小时≥3–4次）', tag: 'body' },
-  { week: 30, title: '开始凯格尔运动 / 整理待产包', jp: '入院セット準備', desc: '为分娩做准备', tag: 'body' },
-  { week: 32, title: '胎位评估', jp: '胎位確認（さかご有無）', desc: '关注是否头位，臀位（さかご）需讨论矫正或剖腹', tag: 'body' },
-  { week: 35, title: '⭐ GBS 筛查', jp: 'B群溶血性連鎖球菌（GBS）検査', desc: '35–37周，阴道分泌物检测。阳性需产时静脉注射抗生素', tag: 'key' },
-  { week: 36, title: '产检改为每周一次', jp: '健診 毎週', desc: '内诊（内診）评估宫颈，待产包随身', tag: 'body' },
-  { week: 38, title: '临产观察期', jp: '臨月（りんげつ）', desc: '三大临产信号：おしるし（见红）/ 陣痛（规律宫缩）/ 破水', tag: 'body' },
-  { week: 40, title: '🎉 预产期 11月7日', jp: '出産予定日', desc: '41周仍未发动可能催产（誘発分娩）', tag: 'key' },
+  { week: 6, title: '初诊 · 妊娠确认', jp: '初診 / 妊娠確認', desc: '已完成 (3/6)', tag: 'key', done: true },
+  { week: 9, title: '第一次妊妇健检', jp: '第1回 妊婦健診', desc: '已完成 (4/10)', tag: 'key', done: true },
+  { week: 12, title: '稳定期超声', jp: '安定期エコー', desc: '已完成 (4/25)', tag: 'key', done: true },
+  { week: 13, title: '加入铁剂', jp: '鉄剤の追加', desc: '甘氨酸亚铁 27–30mg，配维C，与钙错开', tag: 'supp' },
+  { week: 14, title: '叶酸 → 复合维生素', jp: '葉酸 → マルチビタミン', desc: '神经管期已过', tag: 'supp' },
+  { week: 16, title: '中期唐筛 (Quad)', jp: 'クアトロテスト', desc: '15–20周；自费 ¥2–3万', tag: 'key', confirm: '与医生商量是否需要' },
+  { week: 17, title: '戌の日 · 帯祝い', jp: '戌の日（いぬのひ）', desc: '5个月戌日，神社参拜佩 腹帯', tag: 'body' },
+  { week: 18, title: '可能感觉胎动', jp: '胎動を感じ始める', desc: '初产妇 18–22周', tag: 'body' },
+  { week: 20, title: '⭐ 大排畸超声', jp: '中期エコー / 胎児ドック', desc: '20–24周，胎儿结构筛查', tag: 'key', confirm: '代官山是否提供？或去 FMF Japan' },
+  { week: 20, title: '加入钙剂', jp: 'カルシウム追加', desc: '柠檬酸钙 1000–1200mg，睡前', tag: 'supp' },
+  { week: 24, title: '⭐ 妊娠糖尿病筛查', jp: '50g GCT → 75g OGTT', desc: '24–28周', tag: 'key', confirm: '禁食、带糖水检查券' },
+  { week: 27, title: 'Tdap（可选）', jp: '三種混合（任意）', desc: '日本非常规，自费', tag: 'vacc' },
+  { week: 28, title: '产检每2周一次', jp: '健診 2週ごと', desc: '开始数胎动', tag: 'body' },
+  { week: 30, title: '整理待产包', jp: '入院セット準備', tag: 'body' },
+  { week: 32, title: '胎位评估', jp: 'さかご有無確認', desc: '关注是否头位', tag: 'body' },
+  { week: 35, title: '⭐ GBS 筛查', jp: 'B群溶連菌（GBS）検査', desc: '35–37周', tag: 'key' },
+  { week: 36, title: '产检每周一次', jp: '健診 毎週', tag: 'body' },
+  { week: 38, title: '临产观察期', jp: '臨月', desc: 'おしるし / 陣痛 / 破水', tag: 'body' },
+  { week: 40, title: '🎉 预产期 11/2', jp: '出産予定日', tag: 'key' },
 ];
-
 milestones.sort((a,b) => a.week - b.week);
 
-const upcomingMilestones = milestones.filter(m => !m.done && m.week >= weeks && (m.tag === 'key' || m.tag === 'vacc'));
-const nextM = upcomingMilestones[0];
-if (nextM) {
-  const nextDate = weekDate(nextM.week);
-  const daysToNext = Math.ceil((nextDate - today) / (24*60*60*1000));
-  document.getElementById('nextTitle').textContent = nextM.title;
-  document.getElementById('nextMeta').textContent = '约孕 ' + nextM.week + ' 周 · ' + fmtDate(nextDate) + ' 前后 · ' + nextM.jp;
-  document.getElementById('nextCountdown').textContent = daysToNext > 0 ? ('⏳ 还有约 ' + daysToNext + ' 天') : '🟢 当前窗口期内';
-} else {
-  document.getElementById('nextTitle').textContent = '🎉 临产期';
-  document.getElementById('nextMeta').textContent = '关注临产信号';
-  document.getElementById('nextCountdown').textContent = '';
+// 下一个重点
+const upcomingKey = milestones.filter(m => !m.done && m.week >= weeks && (m.tag === 'key' || m.tag === 'vacc'));
+if (upcomingKey[0]) {
+  const m = upcomingKey[0];
+  const d = weekDate(m.week);
+  const dt = Math.ceil((d - today) / 86400000);
+  document.getElementById('nextTitle').textContent = m.title;
+  document.getElementById('nextMeta').textContent = '约孕' + m.week + '周 · ' + fmtDate(d) + ' · ' + m.jp;
+  document.getElementById('nextCountdown').textContent = dt > 0 ? '⏳ 还有约 ' + dt + ' 天' : '🟢 当前窗口期';
 }
 
-const tagLabels = {
-  key: { cls: 'tag-key', label: '检查' },
-  vacc: { cls: 'tag-vacc', label: '疫苗' },
-  supp: { cls: 'tag-supp', label: '营养' },
-  body: { cls: 'tag-body', label: '身体' },
-  shop: { cls: 'tag-shop', label: '采购' },
-};
+// 渲染时间轴
+const tagMap = { key:{cls:'tag-key',label:'检查'}, vacc:{cls:'tag-vacc',label:'疫苗'}, supp:{cls:'tag-supp',label:'营养'}, body:{cls:'tag-body',label:'身体'} };
 const tlEl = document.getElementById('timeline');
 milestones.forEach(m => {
-  let cls = 'timeline-item';
+  let cls = 'tl-item';
   if (m.done || m.week < weeks - 1) cls += ' done';
   else if (Math.abs(m.week - weeks) <= 2) cls += ' current';
   else cls += ' upcoming';
-  const t = tagLabels[m.tag];
+  const t = tagMap[m.tag];
   const d = weekDate(m.week);
-  const confirmHTML = m.confirm ? `<div class="ti-confirm">📌 确认：${m.confirm}</div>` : '';
+  const conf = m.confirm ? `<div class="tl-confirm">📌 ${m.confirm}</div>` : '';
   tlEl.insertAdjacentHTML('beforeend', `
     <div class="${cls}">
-      <div class="ti-header">
-        <div class="ti-title"><span class="ti-tag ${t.cls}">${t.label}</span>${m.title}</div>
-        <div class="ti-week">孕${m.week}周 · ${fmtDate(d)}</div>
-      </div>
-      <div class="ti-desc">${m.desc}</div>
-      <div class="ti-jp">日本：${m.jp}</div>
-      ${confirmHTML}
-    </div>
-  `);
+      <div class="tl-h"><div class="tl-t"><span class="tag ${t.cls}">${t.label}</span>${m.title}</div><div class="tl-w">孕${m.week}周·${fmtDate(d)}</div></div>
+      ${m.desc?`<div class="tl-d">${m.desc}</div>`:''}
+      <div class="tl-jp">日：${m.jp}</div>${conf}
+    </div>`);
 });
 
-// 营养品
+// =================== 营养品 ===================
 const supplements = [
-  { name: '叶酸 / 复合维生素', startW: 0, endW: 99, dose: '早餐后', note: '14周后可换为含叶酸的孕妇复合维' },
-  { name: 'DHA（藻油）', startW: 12, endW: 99, dose: '200–300mg · 晚餐后', note: '到哺乳期' },
-  { name: '维生素 D3', startW: 0, endW: 99, dose: '400–1000 IU · 随餐', note: '全程' },
-  { name: '铁剂（甘氨酸亚铁）', startW: 13, endW: 99, dose: '27–30mg · 中午配维C', note: '与钙错开2小时' },
-  { name: '钙（柠檬酸钙）', startW: 20, endW: 99, dose: '1000–1200mg · 睡前', note: '防夜间抽筋' },
+  { name: '叶酸/复合维', startW: 0, dose: '早餐后', note: '14周后换孕妇复合维' },
+  { name: 'DHA(藻油)', startW: 12, dose: '200–300mg · 晚餐后', note: '到哺乳期' },
+  { name: '维生素 D3', startW: 0, dose: '400–1000 IU · 随餐', note: '全程' },
+  { name: '铁剂', startW: 13, dose: '27–30mg · 中午配维C', note: '与钙错开2小时' },
+  { name: '钙', startW: 20, dose: '1000–1200mg · 睡前', note: '防夜抽筋' },
 ];
-const suppList = document.getElementById('suppList');
+const suppEl = document.getElementById('suppList');
 supplements.forEach(s => {
-  let status, statusCls;
-  if (weeks >= s.startW && weeks <= s.endW) {
-    if (weeks - s.startW < 2) { status = '🆕 现在加入'; statusCls = 'status-add'; }
-    else { status = '✅ 持续服用'; statusCls = 'status-take'; }
-  } else if (weeks < s.startW) {
-    status = '⏳ 第' + s.startW + '周开始'; statusCls = 'status-soon';
-  } else {
-    status = '— 已结束'; statusCls = 'status-soon';
-  }
-  suppList.insertAdjacentHTML('beforeend', `
+  let status, cls;
+  if (weeks >= s.startW) {
+    if (weeks - s.startW < 2) { status = '🆕 现在加入'; cls = 'st-add'; }
+    else { status = '✅ 持续'; cls = 'st-take'; }
+  } else { status = '⏳ ' + s.startW + '周开始'; cls = 'st-soon'; }
+  suppEl.insertAdjacentHTML('beforeend', `
     <div class="supp-row">
-      <div>
-        <div class="supp-name">${s.name}</div>
-        <div class="supp-status">${s.dose} · ${s.note}</div>
-      </div>
-      <div class="${statusCls}" style="text-align:right;font-size:12px;white-space:nowrap;">${status}</div>
-    </div>
-  `);
+      <div><div class="supp-name">${s.name}</div><div class="supp-sub">${s.dose} · ${s.note}</div></div>
+      <div class="supp-status ${cls}">${status}</div>
+    </div>`);
 });
 
-// 母婴用品购买时间表 — 按月组织
-const shopMonths = [
-  {
-    month: 5, weekRange: [16, 19], title: '5ヶ月（16–19週）安定期 · 调研期',
-    note: '稳定期开始，体力还好，先逛实体店、做调研',
-    items: [
-      { p: 'must', name: '腹帯（ふくたい）/ 托腹带', rec: '戌の日传统用。推荐：犬印本舗、ピジョン妊婦帯' },
-      { p: 'rec', name: '孕妇装 / 内衣', rec: 'ユニクロ授乳ブラ、犬印、Sweet Mommy' },
-      { p: 'opt', name: '调研：ベビーカー（婴儿车）', rec: '逛 アカチャンホンポ / 西松屋 试推。考虑：Combi、Aprica、Cybex、Stokke' },
-    ]
-  },
-  {
-    month: 6, weekRange: [20, 23], title: '6ヶ月（20–23週）开始下单',
-    note: '大排畸知道性别后可下单衣物。大件提前订（产期前2-3个月送货）',
-    items: [
-      { p: 'must', name: 'チャイルドシート（汽车安全座椅）', rec: '出院当天必须用。新生儿用 0+ 组：Combi クルムーヴ、Aprica フラディア、Joie i-Spin 360' },
-      { p: 'must', name: 'ベビーベッド or ベビー布団', rec: '日本多用 ベビー布団（婴儿被褥）。租赁也方便：かしてネッと、ナイス' },
-      { p: 'rec', name: 'ベビーカー（婴儿车）', rec: 'A型（出生即可用）：Combi スゴカル、Aprica オプティア、Cybex Mios。约 ¥4–8万' },
-      { p: 'opt', name: '抱っこ紐（背带）', rec: 'Ergobaby Omni Breeze、Konny、BabyBjörn Mini（新生儿期）' },
-    ]
-  },
-  {
-    month: 7, weekRange: [24, 27], title: '7ヶ月（24–27週）确定大件',
-    note: '糖筛前后，下单大件物品，确保产前送达',
-    items: [
-      { p: 'must', name: '新生儿肌着セット', rec: '短肌着+长肌着+コンビ肌着 各5–6件。ミキハウス HB / アカチャンホンポ自社品牌 / ユニクロ' },
-      { p: 'must', name: 'ツーウェイオール（连体衣）', rec: '50–60cm 5件起。ミキハウス、コンビミニ' },
-      { p: 'rec', name: 'おむつ（纸尿裤）新生儿用', rec: '推荐 Merries（メリーズ）/ Moony / Pampers Premium。先小包试用' },
-      { p: 'rec', name: 'ベビーバス（婴儿浴盆）', rec: '永和 / リッチェル。可折叠款节省空间' },
-      { p: 'opt', name: 'ベビーモニター', rec: 'パナソニック KX-HC705、Cubo Ai' },
-    ]
-  },
-  {
-    month: 8, weekRange: [28, 31], title: '8ヶ月（28–31週）入院セット准备',
-    note: '后期产检每2周一次。开始整理待产包',
-    items: [
-      { p: 'must', name: '入院セット（待产包）', rec: '产褥垫（産褥パッド）、母乳パッド、骨盤ベルト、授乳ブラ、産後ショーツ。アカチャンホンポ有现成セット' },
-      { p: 'must', name: '哺乳瓶（授乳びん）', rec: 'ピジョン 母乳実感（最受欢迎）、Betta、コンビ Teteo。先备 2–3只' },
-      { p: 'must', name: '消毒器 / 奶瓶刷', rec: 'コンビ 除菌じょ～ずα（蒸气消毒最方便）' },
-      { p: 'rec', name: 'ガーゼハンカチ', rec: '20条左右，用于喂奶、洗脸。ミキハウス、西松屋' },
-      { p: 'rec', name: '若母乳：搾乳器', rec: 'ピジョン 電動 / Medela ハーモニー（手动）' },
-      { p: 'opt', name: '若奶粉：粉ミルク', rec: '明治ほほえみ / 森永はぐくみ / 和光堂レーベンス' },
-    ]
-  },
-  {
-    month: 9, weekRange: [32, 35], title: '9ヶ月（32–35週）最终采购',
-    note: '随时可能临产，全部完成',
-    items: [
-      { p: 'must', name: '出院装（退院時のセレモニードレス）', rec: 'ミキハウス、ファミリア。可选简单的婴儿和服 / 礼服' },
-      { p: 'must', name: 'ベビーバスタオル / おくるみ', rec: 'aden+anais、今治タオル' },
-      { p: 'must', name: '体温計（耳/額温度计）', rec: 'OMRON、Braun ThermoScan' },
-      { p: 'rec', name: '爪切り、綿棒、ベビーオイル', rec: 'ピジョン 婴儿护理小套装' },
-      { p: 'rec', name: '产后骨盆带 / 产后内衣', rec: 'ピジョン 助産師さんの腹巻、犬印 産後ガードル' },
-    ]
-  },
-  {
-    month: 10, weekRange: [36, 40], title: '10ヶ月（36週–）随时可能出生',
-    note: '只跑医院，所有东西就位',
-    items: [
-      { p: 'must', name: '住院包随身备好', rec: '母子手帳、保険証、印鑑、入院セット、充电器' },
-      { p: 'opt', name: 'おしりふき・コットン', rec: '到时候按需购买，アカチャンホンポ常备' },
-    ]
-  },
-];
+// =================== 今日提醒 ===================
+const reminders = [];
+supplements.forEach(s => {
+  if (weeks >= s.startW) {
+    if (weeks - s.startW < 2) reminders.push({ emoji: '🆕', label: '本周开始：' + s.name, sub: s.dose });
+  }
+});
+upcomingKey.slice(0, 2).forEach(m => {
+  const d = weekDate(m.week);
+  const dt = Math.ceil((d - today) / 86400000);
+  if (dt <= 21) reminders.push({ emoji: '📅', label: m.title + '（' + dt + '天后）', sub: m.jp });
+});
+if (weeks >= 28) reminders.push({ emoji: '👶', label: '今天数胎动了吗？', sub: '建议固定时间（饭后），1小时 ≥3–4次' });
+if (reminders.length === 0) reminders.push({ emoji: '🌸', label: '今天保持愉快心情，规律饮食', sub: '一切按节奏进行中' });
+const remEl = document.getElementById('todayReminders');
+reminders.forEach(r => {
+  remEl.insertAdjacentHTML('beforeend', `<div class="reminder"><div class="emoji">${r.emoji}</div><div class="body"><div class="label">${r.label}</div><div class="sub">${r.sub||''}</div></div></div>`);
+});
 
-const shopEl = document.getElementById('shopTimeline');
-const priorityLabels = {
-  must: { cls: 'priority-must', label: '必备' },
-  rec: { cls: 'priority-rec', label: '推荐' },
-  opt: { cls: 'priority-opt', label: '可选' },
-};
+// =================== 购物清单 ===================
+const shopMonths = [
+  { month: 5, range: [16,19], title: '5ヶ月（16–19週）调研期', note: '逛实体店调研', items: [
+    { id: 'fukutai', p: 'must', name: '腹帯（ふくたい）', rec: '犬印本舗、ピジョン妊婦帯' },
+    { id: 'matwear', p: 'rec', name: '孕妇装/内衣', rec: 'ユニクロ、Sweet Mommy、犬印' },
+    { id: 'res-stroller', p: 'opt', name: '调研：ベビーカー', rec: '逛 アカチャンホンポ 试推' },
+  ]},
+  { month: 6, range: [20,23], title: '6ヶ月（20–23週）下大件', note: '大件提前订（产前2-3月送达）', items: [
+    { id: 'carseat', p: 'must', name: 'チャイルドシート', rec: 'Combi クルムーヴ、Aprica フラディア、Joie i-Spin 360' },
+    { id: 'bed', p: 'must', name: 'ベビーベッド/布団', rec: 'かしてネッと（租赁）、ファルスカ' },
+    { id: 'stroller', p: 'rec', name: 'ベビーカー A型', rec: 'Combi スゴカル、Aprica オプティア、Cybex Mios' },
+    { id: 'carrier', p: 'opt', name: '抱っこ紐', rec: 'Ergobaby Omni、Konny、BabyBjörn Mini' },
+  ]},
+  { month: 7, range: [24,27], title: '7ヶ月（24–27週）衣物', note: '糖筛前后下单，确保产前送达', items: [
+    { id: 'underwear', p: 'must', name: '新生儿肌着セット', rec: '短肌着+コンビ肌着 各5–6件，ミキハウス HB' },
+    { id: 'twoway', p: 'must', name: 'ツーウェイオール', rec: '50–60cm 5件，ミキハウス、コンビミニ' },
+    { id: 'diaper', p: 'rec', name: 'おむつ NB号', rec: 'Merries、Moony、Pampers Premium' },
+    { id: 'bath', p: 'rec', name: 'ベビーバス', rec: '永和、リッチェル 折叠款' },
+    { id: 'monitor', p: 'opt', name: 'ベビーモニター', rec: 'Cubo Ai、Panasonic KX-HC705' },
+  ]},
+  { month: 8, range: [28,31], title: '8ヶ月（28–31週）入院セット', note: '后期产检每2周', items: [
+    { id: 'hospital', p: 'must', name: '入院セット', rec: '産褥パッド、母乳パッド、骨盤ベルト、産後ショーツ' },
+    { id: 'bottle', p: 'must', name: '哺乳瓶 2–3只', rec: 'ピジョン 母乳実感、Betta、コンビ Teteo' },
+    { id: 'sterilizer', p: 'must', name: '消毒器', rec: 'コンビ 除菌じょ～ずα（蒸气消毒）' },
+    { id: 'gauze', p: 'rec', name: 'ガーゼハンカチ 20条', rec: 'ミキハウス、西松屋' },
+    { id: 'pump', p: 'rec', name: '搾乳器', rec: 'ピジョン 電動、Medela ハーモニー' },
+    { id: 'formula', p: 'opt', name: '粉ミルク（备用）', rec: '明治ほほえみ、森永はぐくみ' },
+  ]},
+  { month: 9, range: [32,35], title: '9ヶ月（32–35週）最终采购', note: '随时可能临产', items: [
+    { id: 'ceremony', p: 'must', name: '退院セレモニードレス', rec: 'ミキハウス、ファミリア' },
+    { id: 'towel', p: 'must', name: 'バスタオル/おくるみ', rec: 'aden+anais、今治タオル' },
+    { id: 'thermo', p: 'must', name: '体温計', rec: 'OMRON、Braun ThermoScan' },
+    { id: 'care', p: 'rec', name: '爪切、綿棒、ベビーオイル', rec: 'ピジョン 婴儿护理套装' },
+    { id: 'postpartum', p: 'rec', name: '产后骨盆带', rec: 'ピジョン、犬印 産後ガードル' },
+  ]},
+  { month: 10, range: [36,40], title: '10ヶ月（36週–）待产', note: '所有就位', items: [
+    { id: 'go', p: 'must', name: '住院包随身', rec: '母子手帳、保険証、印鑑、充电器' },
+  ]},
+];
+const priorityMap = { must:{cls:'p-must',l:'必备'}, rec:{cls:'p-rec',l:'推荐'}, opt:{cls:'p-opt',l:'可选'} };
+
+// 购物状态从 localStorage 读取
+function loadShop() { try { return JSON.parse(localStorage.getItem('shop_v1') || '{}'); } catch(e) { return {}; } }
+function saveShop(s) { localStorage.setItem('shop_v1', JSON.stringify(s)); }
+let shopState = loadShop();
+
+const shopEl2 = document.getElementById('shopTimeline');
 shopMonths.forEach(sm => {
-  const isCurrent = weeks >= sm.weekRange[0] && weeks <= sm.weekRange[1];
-  const isPast = weeks > sm.weekRange[1];
-  const isFuture = weeks < sm.weekRange[0];
-  const cls = 'shop-month' + (isCurrent ? ' current' : '');
-  const stateLabel = isCurrent ? '🟣 现在' : (isPast ? '✓' : '⏳');
+  const isCurrent = weeks >= sm.range[0] && weeks <= sm.range[1];
+  const isFuture = weeks < sm.range[0];
   const itemsHTML = sm.items.map(it => {
-    const pl = priorityLabels[it.p];
-    return `<div class="shop-item">
-      <div><span class="shop-priority ${pl.cls}">${pl.label}</span><span class="shop-item-name">${it.name}</span></div>
-      <div class="shop-item-rec">${it.rec}</div>
+    const pl = priorityMap[it.p];
+    const checked = shopState[it.id] ? 'checked' : '';
+    const ckCls = shopState[it.id] ? 'checked' : '';
+    return `<div class="shop-item ${ckCls}" data-id="${it.id}">
+      <label><input type="checkbox" ${checked} onchange="toggleShop('${it.id}', this)">
+      <div class="shop-item-body"><div><span class="priority ${pl.cls}">${pl.l}</span><span class="shop-item-name">${it.name}</span></div><div class="shop-item-rec">${it.rec}</div></div></label>
     </div>`;
   }).join('');
-  shopEl.insertAdjacentHTML('beforeend', `
-    <details ${isCurrent || (isFuture && sm.weekRange[0] - weeks <= 4) ? 'open' : ''} class="${cls}">
-      <summary class="shop-header">
-        <div>
-          <span style="margin-right:6px;">${stateLabel}</span>
-          <span class="shop-month-title">${sm.title}</span>
-        </div>
-        <div class="shop-month-week">孕${sm.weekRange[0]}–${sm.weekRange[1]}周</div>
-      </summary>
-      <div class="shop-content">
-        <div style="font-size:12px;color:#888;margin-bottom:8px;">${sm.note}</div>
-        ${itemsHTML}
-      </div>
-    </details>
-  `);
+  shopEl2.insertAdjacentHTML('beforeend', `
+    <details ${isCurrent || (isFuture && sm.range[0]-weeks <=4) ? 'open' : ''} class="shop-month ${isCurrent?'current':''}">
+      <summary><div><span style="margin-right:6px;">${isCurrent?'🟣':(weeks>sm.range[1]?'✓':'⏳')}</span><span class="shop-mt">${sm.title}</span></div><div class="shop-mw">孕${sm.range[0]}–${sm.range[1]}周</div></summary>
+      <div class="shop-content"><div class="shop-note">${sm.note}</div>${itemsHTML}</div>
+    </details>`);
 });
-</script>
 
+function toggleShop(id, cb) {
+  shopState[id] = cb.checked;
+  saveShop(shopState);
+  cb.closest('.shop-item').classList.toggle('checked', cb.checked);
+  updateShopProgress();
+}
+function updateShopProgress() {
+  let total = 0, done = 0, mustTotal = 0, mustDone = 0;
+  shopMonths.forEach(sm => sm.items.forEach(it => {
+    total++;
+    if (shopState[it.id]) done++;
+    if (it.p === 'must') { mustTotal++; if (shopState[it.id]) mustDone++; }
+  }));
+  document.getElementById('shopProgress').innerHTML =
+    `<div style="font-size:13px;">必备 <b>${mustDone}/${mustTotal}</b> · 全部 <b>${done}/${total}</b></div>
+     <div class="progress" style="margin-top:8px;background:rgba(122,74,184,0.15);"><div style="width:${total?(done/total*100):0}%;background:#7a4ab8;"></div></div>`;
+}
+updateShopProgress();
+
+// =================== 体重记录 ===================
+function loadW() { try { return JSON.parse(localStorage.getItem('weight_v1') || '[]'); } catch(e) { return []; } }
+function saveW(d) { localStorage.setItem('weight_v1', JSON.stringify(d)); }
+let weightData = loadW();
+
+function addWeight() {
+  const v = parseFloat(document.getElementById('weightInput').value);
+  if (!v) return;
+  weightData.push({ date: today.toISOString().slice(0,10), week: weeks + 'w' + dayOfWeek + 'd', weight: v });
+  saveW(weightData);
+  document.getElementById('weightInput').value = '';
+  renderWeights();
+}
+function delWeight(idx) {
+  weightData.splice(idx, 1); saveW(weightData); renderWeights();
+}
+function renderWeights() {
+  const list = document.getElementById('weightList');
+  list.innerHTML = weightData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...weightData].reverse().forEach((w, i) => {
+    const realIdx = weightData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `<div class="rec-item"><div><div>${w.date}</div><div class="rec-date">${w.week}</div></div><div style="display:flex;align-items:center;gap:8px;"><div class="rec-val">${w.weight} kg</div><button class="rec-del" onclick="delWeight(${realIdx})">✕</button></div></div>`);
+  });
+  drawWeightChart();
+}
+let weightChart = null;
+function drawWeightChart() {
+  const ctx = document.getElementById('weightChart');
+  if (!ctx || !window.Chart) return;
+  if (weightChart) weightChart.destroy();
+  const labels = weightData.map(w => w.week);
+  const data = weightData.map(w => w.weight);
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: '体重 kg', data, borderColor: '#b85c7e', backgroundColor: 'rgba(184,92,126,0.1)', tension: 0.3, fill: true }] },
+    options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:false}} }
+  });
+}
+renderWeights();
+
+// =================== 产检记录 ===================
+function loadC() { try { return JSON.parse(localStorage.getItem('checkup_v1') || '[]'); } catch(e) { return []; } }
+function saveC(d) { localStorage.setItem('checkup_v1', JSON.stringify(d)); }
+let checkupData = loadC();
+
+document.getElementById('checkupDate').valueAsDate = new Date();
+document.getElementById('checkupWeek').value = weeks + 'w' + dayOfWeek + 'd';
+document.getElementById('checkupDate').addEventListener('change', e => {
+  const d = new Date(e.target.value);
+  if (!isNaN(d)) {
+    const days = Math.floor((d - LMP) / 86400000);
+    document.getElementById('checkupWeek').value = Math.floor(days/7) + 'w' + (days%7) + 'd';
+  }
+});
+function addCheckup() {
+  const r = {
+    date: document.getElementById('checkupDate').value,
+    week: document.getElementById('checkupWeek').value,
+    bp: document.getElementById('checkupBP').value,
+    weight: document.getElementById('checkupWeight').value,
+    note: document.getElementById('checkupNote').value,
+  };
+  if (!r.date) return;
+  checkupData.push(r); saveC(checkupData); renderCheckups();
+  document.getElementById('checkupBP').value = '';
+  document.getElementById('checkupWeight').value = '';
+  document.getElementById('checkupNote').value = '';
+}
+function delCheckup(idx) { checkupData.splice(idx, 1); saveC(checkupData); renderCheckups(); }
+function renderCheckups() {
+  const list = document.getElementById('checkupList');
+  list.innerHTML = checkupData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...checkupData].reverse().forEach((c, i) => {
+    const realIdx = checkupData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `
+      <div class="rec-item" style="display:block;">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div><b>${c.date}</b> <span class="rec-date">${c.week||''}</span></div>
+          <button class="rec-del" onclick="delCheckup(${realIdx})">✕</button>
+        </div>
+        ${c.bp?`<div style="font-size:12px;margin-top:4px;">血压 ${c.bp}${c.weight?' · 体重 '+c.weight+'kg':''}</div>`:c.weight?`<div style="font-size:12px;margin-top:4px;">体重 ${c.weight}kg</div>`:''}
+        ${c.note?`<div style="font-size:12px;color:#666;margin-top:4px;">${c.note}</div>`:''}
+      </div>`);
+  });
+}
+renderCheckups();
+
+// =================== 胎动计数器 ===================
+let kickCount = 0, kickStart = null;
+function loadK() { try { return JSON.parse(localStorage.getItem('kicks_v1') || '[]'); } catch(e) { return []; } }
+function saveK(d) { localStorage.setItem('kicks_v1', JSON.stringify(d)); }
+let kickData = loadK();
+
+function recordKick() {
+  if (kickStart === null) kickStart = Date.now();
+  kickCount++;
+  document.getElementById('kickCount').textContent = kickCount;
+  updateKickTime();
+}
+function updateKickTime() {
+  if (kickStart === null) { document.getElementById('kickTime').textContent = '还未开始'; return; }
+  const mins = Math.floor((Date.now() - kickStart) / 60000);
+  document.getElementById('kickTime').textContent = '已计时 ' + mins + ' 分钟';
+}
+function resetKick() {
+  kickCount = 0; kickStart = null;
+  document.getElementById('kickCount').textContent = '0';
+  updateKickTime();
+}
+function saveKickSession() {
+  if (kickCount === 0) return;
+  const dur = kickStart ? Math.floor((Date.now() - kickStart) / 60000) : 0;
+  kickData.push({ date: new Date().toISOString().slice(0,16).replace('T',' '), count: kickCount, duration: dur, week: weeks + 'w' + dayOfWeek + 'd' });
+  saveK(kickData); renderKicks(); resetKick();
+}
+function delKick(idx) { kickData.splice(idx, 1); saveK(kickData); renderKicks(); }
+function renderKicks() {
+  const list = document.getElementById('kickList');
+  list.innerHTML = kickData.length === 0 ? '<div class="empty">还没有记录</div>' : '';
+  [...kickData].reverse().forEach((k, i) => {
+    const realIdx = kickData.length - 1 - i;
+    list.insertAdjacentHTML('beforeend', `<div class="rec-item"><div><div>${k.date}</div><div class="rec-date">${k.week} · ${k.duration}分钟</div></div><div style="display:flex;align-items:center;gap:8px;"><div class="rec-val">${k.count} 次</div><button class="rec-del" onclick="delKick(${realIdx})">✕</button></div></div>`);
+  });
+}
+renderKicks();
+setInterval(updateKickTime, 30000);
+
+// =================== 政府补助 & 课程（按时间顺序） ===================
+// sortW: 妊娠周（产前）；产后用 40 + 出生后周数
+const supports = [
+  // ===== 孕早期 =====
+  { id:'sup-shika', sortW:6, t:'妊婦歯科健診', when:'孕初期（已完成 2/6）', d:'孕期 1 次免费牙科检查', how:'区指定牙科诊所', amount:'免费', done:true },
+  { id:'sup-bosi', sortW:8, t:'母子健康手帳', when:'妊娠届出后（已领取）', d:'渋谷区役所发放，每次产检带', how:'区役所子ども家庭部', amount:'免费', done:true },
+  { id:'sup-jushin', sortW:8, t:'妊婦健診受診票（14回分）', when:'随母子手帳发放（已领取）', d:'14回分产检补助券', how:'随母子手帳发放', amount:'¥10万+ 补助', done:true },
+
+  // ===== 孕中期 =====
+  { id:'sup-hokenrigen', sortW:12, t:'国民健康保险减免', when:'怀孕 85 天起（孕12周）', d:'产前1月+产后共4个月减免（双胎6个月）。预产期前6个月起可申请', how:'渋谷区役所国保科', amount:'保费减免' },
+  { id:'sup-mendan', sortW:16, t:'妊妇面谈（ネウボラ）', when:'孕 16–32 周', d:'与保健师沟通生产/育儿/产后支持。完成后才能领育儿礼包', how:'LINE 预约（面谈日前30天起）', amount:'免费' },
+  { id:'sup-ryoshin', sortW:16, t:'両親学級 / ハローベビー教室', when:'孕 16–32 周', d:'区主催课程：换尿布、洗澡、哺乳、产前后心理。爸爸也建议参加', how:'渋谷区 LINE 或网上预约', amount:'免费' },
+  { id:'sup-sankyu', sortW:24, t:'産前産後休業 申请（如工作）', when:'孕 6 月准备，产前 6 周开始', d:'产前6周（双胎14周）+ 产后8周。加入健康保险者可领出産手当金', how:'公司人事 / 健康保险', amount:'¥30–50万' },
+
+  // ===== 孕晚期 =====
+  { id:'sup-helper', sortW:28, t:'産前産後ヘルパー 申请', when:'孕 28 周起申请', d:'家务/育儿支援，1000日元/小时，可用至3岁', how:'渋谷区子育て支援科', amount:'1000円/h' },
+  { id:'sup-care', sortW:28, t:'産後ケア 申请', when:'孕 28 周起申请', d:'住宿型(¥3500/天)5天 / 上门型(¥1000/次)3次 / 日间型(¥2000/次)5次', how:'LINE 申请', amount:'¥1000–3500' },
+  { id:'sup-pkg', sortW:33, t:'育児パッケージ 育儿礼包', when:'孕 33 周后自动发放', d:'婴儿衣物、围兜、体温计、毛巾、玩具等。需先完成妊妇面谈+33周仍住涩谷区', how:'妊妇面谈完后自动到期发放', amount:'礼包约¥3万' },
+
+  // ===== 出生后（限期）=====
+  { id:'sup-shussei', sortW:40, t:'出生届（出生登记）', when:'出生后 14 天内 ⏰', d:'必交。先到医院拿出生证明书，再到区役所登记', how:'渋谷区役所戸籍住民課', amount:'必办', deadline: true },
+  { id:'sup-iryosho', sortW:40, t:'子供医療費補助 医療証', when:'出生后 14 天内 ⏰', d:'婴幼儿医疗费补助（无收入限制），所有医疗免费/低费', how:'区役所子ども家庭部', amount:'医疗补助', deadline: true },
+  { id:'sup-mynumber', sortW:40, t:'マイナンバー カード（推荐）', when:'随出生届一起办（最快）', d:'与出生申报一起办最快，约1周寄到。否则需带宝宝本人去办', how:'区役所同时申请', amount:'免费' },
+  { id:'sup-jido', sortW:40, t:'児童手当 申请', when:'出生后 15 天内 ⏰', d:'每月¥10,000–15,000，发放至高中毕业（18岁）。主收入者申请', how:'区役所子ども家庭部', amount:'¥1–1.5万/月', deadline: true },
+  { id:'sup-tsuchi', sortW:40, t:'出生通知票 提交', when:'出生后 1 个月内 ⏰', d:'用于安排新生儿访问、Hello Baby家访、健诊', how:'LINE 提交', amount:'必办', deadline: true },
+  { id:'sup-houmon', sortW:41, t:'新生児訪問', when:'出生后 28 天内', d:'助产师免费上门，指导喂养、体重、育儿问题', how:'提交出生通知票后自动安排', amount:'免费' },
+  { id:'sup-ichijikin', sortW:42, t:'出産育児一時金', when:'出生后 1 年内', d:'¥50万（2026年起）。多数医院使用直接支付制度，从产费扣除', how:'医院直接申请 / 健康保险', amount:'¥50万' },
+  { id:'sup-teate', sortW:42, t:'出産手当金（如工作）', when:'产后 2 年内申请', d:'产假期间补偿，约工资2/3 × 产前6周+产后8周', how:'健康保险組合 / 公司人事', amount:'¥30–50万' },
+  { id:'sup-yobou', sortW:44, t:'予防接種券', when:'生后 1 个月起', d:'政府寄送。定期疫苗免费，任意疫苗部分补助', how:'按时间表去儿科诊所', amount:'多数免费' },
+
+  // ===== 产后中长期 =====
+  { id:'sup-iku', sortW:46, t:'育児休業給付金（如工作）', when:'产假结束后', d:'育儿假补偿：前180天工资67%，之后50%', how:'公司人事 / ハローワーク', amount:'最长2年' },
+  { id:'sup-hello', sortW:48, t:'Hello Baby 家访', when:'出生后约 2 个月寄通知', d:'所有家庭都会安排，育儿咨询、心理支持', how:'区里通知后预约', amount:'免费' },
+  { id:'sup-hiyoko', sortW:48, t:'ひよこママの時間', when:'生后 1–5 个月', d:'区主办妈妈交流会，无需预约。情绪支持+认识其他妈妈', how:'随时参加', amount:'免费' },
+  { id:'sup-kenshin', sortW:53, t:'乳幼児健診', when:'3–4月 / 6–7月 / 9–10月 / 1.5岁 / 3岁', d:'区指定免费体检', how:'按通知去区指定医院', amount:'免费' },
+];
+
+// 按时间排序
+supports.sort((a, b) => a.sortW - b.sortW);
+
+function loadSup() { try { return JSON.parse(localStorage.getItem('sup_v1') || '{}'); } catch(e) { return {}; } }
+function saveSup(s) { localStorage.setItem('sup_v1', JSON.stringify(s)); }
+let supState = loadSup();
+// 预填已完成项
+supports.forEach(s => { if (s.done && supState[s.id] === undefined) supState[s.id] = true; });
+saveSup(supState);
+
+// 按时间分组：孕早期 / 孕中期 / 孕晚期 / 出生后限期 / 产后长期
+function getSupGroup(s) {
+  if (s.sortW < 13) return { key:'early', title:'🌱 孕早期', order:1 };
+  if (s.sortW < 28) return { key:'mid',   title:'🌷 孕中期', order:2 };
+  if (s.sortW < 40) return { key:'late',  title:'🌸 孕晚期', order:3 };
+  if (s.sortW < 43) return { key:'birth', title:'⏰ 出生后限期申请（最重要）', order:4, urgent:true };
+  return                   { key:'post',  title:'👶 产后中长期', order:5 };
+}
+
+const supEl = document.getElementById('supList');
+const groups = {};
+supports.forEach(s => {
+  const g = getSupGroup(s);
+  if (!groups[g.key]) groups[g.key] = { ...g, items: [] };
+  groups[g.key].items.push(s);
+});
+Object.values(groups).sort((a, b) => a.order - b.order).forEach(g => {
+  const titleCls = g.urgent ? 'sup-section-title urgent' : 'sup-section-title';
+  let html = `<div class="sup-section"><div class="${titleCls}">${g.title}</div>`;
+  g.items.forEach(s => {
+    const checked = supState[s.id] ? 'checked' : '';
+    let cardState;
+    if (supState[s.id]) cardState = 'done';
+    else if (s.deadline || g.urgent) cardState = 'urgent';
+    else if (s.sortW <= weeks + 2 && s.sortW >= weeks - 2) cardState = 'now';
+    else cardState = 'future';
+    const cardCls = `sup-card ${cardState}`;
+    const whenCls = s.deadline ? 'sup-when deadline' : 'sup-when';
+    html += `
+      <div class="${cardCls}" data-id="${s.id}">
+        <div class="sup-h">
+          <input type="checkbox" ${checked} onchange="toggleSup('${s.id}', this)">
+          <div class="sup-h-body">
+            <div class="sup-t">${s.t}</div>
+            <div class="${whenCls}">${s.when}</div>
+            ${s.amount ? `<span class="sup-amount">${s.amount}</span>` : ''}
+            ${s.d ? `<div class="sup-d">${s.d}</div>` : ''}
+            ${s.how ? `<div class="sup-how">📍 ${s.how}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  supEl.insertAdjacentHTML('beforeend', html);
+});
+
+function toggleSup(id, cb) {
+  supState[id] = cb.checked;
+  saveSup(supState);
+  cb.closest('.sup-card').classList.toggle('done', cb.checked);
+  updateSupProgress();
+}
+function updateSupProgress() {
+  const actionable = supports.filter(s => !s.done);
+  const done = actionable.filter(s => supState[s.id]).length;
+  const urgent = supports.filter(s => s.deadline);
+  const urgentDone = urgent.filter(s => supState[s.id]).length;
+  document.getElementById('supProgress').innerHTML =
+    `<div style="font-size:13px;">出生后限期 <b>${urgentDone}/${urgent.length}</b> · 全部 <b>${done}/${actionable.length}</b></div>
+     <div class="progress" style="margin-top:8px;background:rgba(61,138,90,0.15);"><div style="width:${actionable.length?(done/actionable.length*100):0}%;background:#3d8a5a;"></div></div>`;
+}
+updateSupProgress();
+
+// =================== Tab 切换 ===================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('nav.bottom-nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelector('main').scrollTo(0, 0);
+}
+function switchSub(name) {
+  document.querySelectorAll('.sub-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('sub-' + name).classList.add('active');
+  document.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// 安装提示
+function dismissHint() {
+  document.getElementById('installHint').style.display = 'none';
+  localStorage.setItem('hintDismissed_v1', '1');
+}
+if (localStorage.getItem('hintDismissed_v1')) document.getElementById('installHint').style.display = 'none';
+
+// =================== 数据导出 / 导入 ===================
+const SYNC_KEYS = ['shop_v1','weight_v1','checkup_v1','kicks_v1','sup_v1'];
+
+function exportData() {
+  const data = { version: 1, exportedAt: new Date().toISOString() };
+  SYNC_KEYS.forEach(k => { data[k] = localStorage.getItem(k); });
+  const json = JSON.stringify(data);
+  // 尝试用 Web Share API（手机原生分享）
+  if (navigator.share) {
+    const blob = new Blob([json], { type: 'application/json' });
+    const file = new File([blob], '孕期管家数据_' + today.toISOString().slice(0,10) + '.json', { type: 'application/json' });
+    navigator.share({ files: [file], title: '孕期管家数据' }).catch(()=>fallbackExport(json));
+  } else {
+    fallbackExport(json);
+  }
+}
+function fallbackExport(json) {
+  // 复制到剪贴板 + 弹窗显示
+  navigator.clipboard.writeText(json).then(() => {
+    document.getElementById('syncStatus').textContent = '✅ 数据已复制到剪贴板，可粘贴到微信/邮件发送';
+    setTimeout(() => document.getElementById('syncStatus').textContent = '', 5000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = json; ta.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;width:90%;height:200px;padding:10px;border-radius:8px;border:2px solid #b85c7e;background:#fff;';
+    document.body.appendChild(ta);
+    ta.select();
+    alert('复制下方文字保存到任意位置');
+    setTimeout(() => document.body.removeChild(ta), 100);
+  });
+}
+
+function importData() {
+  const json = prompt('粘贴对方分享的数据：');
+  if (!json) return;
+  try {
+    const data = JSON.parse(json);
+    if (!data.version) throw new Error('格式错误');
+    let count = 0;
+    SYNC_KEYS.forEach(k => {
+      if (data[k]) { localStorage.setItem(k, data[k]); count++; }
+    });
+    document.getElementById('syncStatus').textContent = `✅ 已导入 ${count} 项数据，1秒后刷新...`;
+    setTimeout(() => location.reload(), 1000);
+  } catch(e) {
+    document.getElementById('syncStatus').textContent = '❌ 数据格式不对，请重新检查';
+  }
+}
+
+// =================== 实时更新（日期变化时自动刷新）===================
+const _lastRenderedDate = today.toDateString();
+function checkDateChange() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  if (now.toDateString() !== _lastRenderedDate) {
+    location.reload();
+  }
+}
+// 切换回 App 时检查
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) checkDateChange();
+});
+// 每分钟检查一次（处理午夜跨日）
+setInterval(checkDateChange, 60000);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous" onload="if(typeof renderWeights==='function')renderWeights()"></script>
 </body>
 </html>
